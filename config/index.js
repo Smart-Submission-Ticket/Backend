@@ -1,0 +1,33 @@
+require("dotenv").config();
+
+PORT = process.env.PORT || 8080;
+NODE_ENV = process.env.NODE_ENV || "development";
+
+DB_URL = process.env.DB_URL;
+JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY;
+AUTH_REQUIRED = process.env.AUTH_REQUIRED == "true";
+
+EMAIL_HOST = process.env.EMAIL_HOST;
+EMAIL_PORT = process.env.EMAIL_PORT;
+EMAIL_USER = process.env.EMAIL_USER;
+EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+
+GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
+GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
+
+STUDENTS_SHEET_ID = process.env.STUDENTS_SHEET_ID;
+
+module.exports = {
+  PORT,
+  NODE_ENV,
+  DB_URL,
+  JWT_PRIVATE_KEY,
+  AUTH_REQUIRED,
+  EMAIL_HOST,
+  EMAIL_PORT,
+  EMAIL_USER,
+  EMAIL_PASSWORD,
+  GOOGLE_CLIENT_EMAIL,
+  GOOGLE_PRIVATE_KEY,
+  STUDENTS_SHEET_ID,
+};
