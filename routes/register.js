@@ -34,12 +34,7 @@ router.post("/verify-email", checkIfStudentAllowed, async (req, res) => {
     otp: otp,
   });
 
-  try {
-    await sendRegistrationOtpMail(member.email, otp);
-  } catch (err) {
-    console.log(err);
-    return res.status(400).send({ message: "Error sending OTP mail." });
-  }
+  sendRegistrationOtpMail(member.email, otp);
 
   await newOtp.save();
   res.status(200).send({
