@@ -16,7 +16,7 @@ const curriculumSchema = new mongoose.Schema({
         required: true,
       },
       teacher: {
-        type: String,
+        type: mongoose.Schema.Types.Mixed,
         required: true,
       },
     },

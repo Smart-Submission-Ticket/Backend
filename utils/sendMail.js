@@ -2,7 +2,12 @@ const nodemailer = require("nodemailer");
 const fs = require("fs");
 const path = require("path");
 
-const { EMAIL_PASSWORD, EMAIL_USER } = require("../config");
+const { NODE_ENV, EMAIL_PASSWORD, EMAIL_USER } = require("../config");
+
+const generateOtp = () => {
+  if (NODE_ENV === "development") return 123456;
+  return Math.floor(100000 + Math.random() * 900000);
+};
 
 const registrationOtpTemplate = fs.readFileSync(
   path.resolve(__dirname, "mail_templates/registration_otp.html"),
@@ -28,6 +33,8 @@ const mailTransporter = nodemailer.createTransport({
 });
 
 const sendForgotPasswordMail = (memberName, memberEmail, otp) => {
+  if (NODE_ENV === "development") return;
+
   const emailBody = forgotPasswordTemplate
     .replaceAll("$$NAME$$", memberName)
     .replaceAll("$$EMAIL$$", memberEmail)
@@ -57,6 +64,8 @@ const sendForgotPasswordMail = (memberName, memberEmail, otp) => {
 };
 
 const sendRegistrationOtpMail = (memberEmail, otp) => {
+  if (NODE_ENV === "development") return;
+
   const emailBody = registrationOtpTemplate
     .replaceAll("$$EMAIL$$", memberEmail)
     .replaceAll("$$OTP$$", otp)
@@ -85,6 +94,8 @@ const sendRegistrationOtpMail = (memberEmail, otp) => {
 };
 
 const sendRegistrationSuccessMail = (memberName, memberEmail) => {
+  if (NODE_ENV === "development") return;
+
   const emailBody = registrationSuccessTemplate
     .replaceAll("$$NAME$$", memberName, "g")
     .replaceAll("$$EMAIL$$", memberEmail, "g")
@@ -113,6 +124,7 @@ const sendRegistrationSuccessMail = (memberName, memberEmail) => {
 };
 
 module.exports = {
+  generateOtp,
   sendForgotPasswordMail,
   sendRegistrationOtpMail,
   sendRegistrationSuccessMail,
