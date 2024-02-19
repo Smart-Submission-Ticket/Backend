@@ -11,6 +11,14 @@ const allowedStudentsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  class: {
+    type: String,
+    required: true,
+  },
+  year: {
+    type: Number,
+    required: true,
+  },
 });
 
 const AllowedStudents = mongoose.model(

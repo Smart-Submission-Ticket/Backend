@@ -4,6 +4,9 @@ PORT = process.env.PORT || 8080;
 NODE_ENV = process.env.NODE_ENV || "development";
 
 DB_URL = process.env.DB_URL;
+DEV_DB_NAME = process.env.DEV_DB_NAME;
+PROD_DB_NAME = process.env.PROD_DB_NAME;
+
 JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY;
 AUTH_REQUIRED = process.env.AUTH_REQUIRED == "true";
 
@@ -20,11 +23,14 @@ GOOGLE_PRIVATE_KEY = GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n");
 STUDENTS_SHEET_ID = process.env.STUDENTS_SHEET_ID;
 CURRICULUM_SHEET_ID = process.env.CURRICULUM_SHEET_ID;
 ATTENDANCE_SHEET_ID = process.env.ATTENDANCE_SHEET_ID;
+CLASSES_SHEET_ID = process.env.CLASSES_SHEET_ID;
 
 module.exports = {
   PORT,
   NODE_ENV,
   DB_URL,
+  DEV_DB_NAME,
+  PROD_DB_NAME,
   JWT_PRIVATE_KEY,
   AUTH_REQUIRED,
   EMAIL_HOST,
@@ -36,4 +42,5 @@ module.exports = {
   STUDENTS_SHEET_ID,
   CURRICULUM_SHEET_ID,
   ATTENDANCE_SHEET_ID,
+  CLASSES_SHEET_ID,
 };

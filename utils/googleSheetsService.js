@@ -6,6 +6,7 @@ const {
   STUDENTS_SHEET_ID,
   CURRICULUM_SHEET_ID,
   ATTENDANCE_SHEET_ID,
+  CLASSES_SHEET_ID,
 } = require("../config");
 
 const sheets = google.sheets("v4");
@@ -55,8 +56,14 @@ async function getAttendanceSpreadSheetValues() {
   return res.data.values;
 }
 
+async function getClassesSpreadSheetValues() {
+  const res = await _getSpreadSheetValues(CLASSES_SHEET_ID);
+  return res.data.values;
+}
+
 module.exports = {
   getStudentsSpreadSheetValues,
   getCurriculumSpreadSheetValues,
   getAttendanceSpreadSheetValues,
+  getClassesSpreadSheetValues,
 };
