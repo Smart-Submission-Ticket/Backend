@@ -13,16 +13,46 @@ const batchSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  rollNos: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
   students: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
     },
   ],
-  curriculum: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Curriculum",
-  },
+  theory: [
+    {
+      title: {
+        type: String,
+        required: true,
+      },
+      teacher: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
+  practical: [
+    {
+      title: {
+        type: String,
+        required: true,
+      },
+      noOfAssignments: {
+        type: Number,
+        required: true,
+      },
+      teacher: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
 
 const Batch = mongoose.model("Batch", batchSchema);

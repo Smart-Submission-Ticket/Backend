@@ -7,6 +7,10 @@ const allowedStudentsSchema = new mongoose.Schema({
     index: true,
     unique: true,
   },
+  rollNo: {
+    type: String,
+    required: true,
+  },
   batch: {
     type: String,
     required: true,
