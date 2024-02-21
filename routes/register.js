@@ -4,9 +4,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const { JWT_PRIVATE_KEY } = require("../config");
-const { AllowedStudents } = require("../models/allowed_student");
+const { StudentData } = require("../models/student_data");
 const { OTP } = require("../models/otp");
-const { Student, validate } = require("../models/student");
+const { StudentLogin, validate } = require("../models/student_login");
 const { Batch } = require("../models/batch");
 const { generateOtp, sendRegistrationOtpMail } = require("../utils/sendMail");
 
@@ -17,7 +17,7 @@ const checkIfStudentAllowed = async (req, res, next) => {
 
   if (!email) return res.status(400).send({ message: "Email is required" });
 
-  const allowedStudent = await AllowedStudents.findOne({
+  const allowedStudent = await StudentData.findOne({
     email: email,
   }).select("-_id -__v");
 
@@ -32,15 +32,12 @@ router.post("/verify-email", checkIfStudentAllowed, async (req, res, next) => {
   try {
     const { email } = _.pick(req.body, ["email"]);
 
-    const student = await Student.findOne({
-      email: email,
-    });
+    const student = await StudentLogin.findOne({ email: email });
 
     if (student)
       return res.status(400).send({ message: "Student already registered." });
 
     const otp = generateOtp();
-
     const newOtp = new OTP({
       email: email,
       otp: otp,
@@ -96,15 +93,15 @@ router.post("/", async (req, res, next) => {
     if (decoded.email !== req.body.email)
       return res.status(400).send({ message: "Invalid token." });
 
-    const student = await Student.findOne({ email: req.body.email });
+    const student = await StudentLogin.findOne({ email: req.body.email });
     if (student)
       return res.status(400).send({ message: "Student already registered." });
 
     const studentData = _.pick(req.body, [
       "name",
       "email",
-      "mobile",
       "password",
+      "mobile",
       "rollNo",
       "abcId",
       "batch",
@@ -112,21 +109,34 @@ router.post("/", async (req, res, next) => {
       "year",
     ]);
 
-    const { error } = validate(studentData);
+    const studentLogin = _.pick(studentData, ["rollNo", "email", "password"]);
+
+    const { error } = validate(studentLogin);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
     const salt = await bcrypt.genSalt(10);
-    studentData.password = await bcrypt.hash(studentData.password, salt);
+    studentLogin.password = await bcrypt.hash(studentData.password, salt);
 
-    const newStudent = new Student(studentData);
-    await newStudent.save();
+    const newStudent = new StudentLogin(studentLogin);
 
-    const batch = await Batch.findOne({ batch: newStudent.batch });
-    if (!batch) return res.status(400).send({ message: "Invalid batch." });
-
-    batch.students.push(newStudent._id);
-    await batch.save();
+    await Promise.all([
+      newStudent.save(),
+      StudentData.findOneAndUpdate(
+        { email: studentData.email },
+        {
+          $set: {
+            name: studentData.name,
+            mobile: studentData.mobile,
+            abcId: studentData.abcId,
+          },
+        }
+      ),
+      Batch.findOneAndUpdate(
+        { batch: studentData.batch },
+        { $push: { students: newStudent._id } }
+      ),
+    ]);
 
     const x_auth_token = newStudent.generateAuthToken();
 

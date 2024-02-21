@@ -1,5 +1,5 @@
 const { Classes } = require("../models/classes");
-const { AllowedStudents } = require("../models/allowed_student");
+const { StudentData } = require("../models/student_data");
 const { StudentRecord } = require("../models/student_record");
 const { Batch } = require("../models/batch");
 
@@ -78,7 +78,7 @@ const uploadStudentsData = async (students) => {
 
   addStudents(batch, rollNos, emails);
 
-  await AllowedStudents.bulkWrite(
+  await StudentData.bulkWrite(
     newStudents.map((s) => ({
       updateOne: {
         filter: { email: s.email },
@@ -90,9 +90,9 @@ const uploadStudentsData = async (students) => {
 };
 
 const uploadCurriculumData = async (curriculum) => {
-  const [classes, allowedStudents, batchDocs] = await Promise.all([
+  const [classes, studentDatas, batchDocs] = await Promise.all([
     Classes.find(),
-    AllowedStudents.find(),
+    StudentData.find(),
     Batch.find(),
   ]);
 
@@ -170,7 +170,7 @@ const uploadCurriculumData = async (curriculum) => {
   for (let i = 0; i < allBatches.length; i++) {
     const batch = allBatches[i];
     const batchDoc = batchDocs.find((b) => b.batch === batch);
-    const rollNos = allowedStudents
+    const rollNos = studentDatas
       .filter((s) => s.batch === batch)
       .map((s) => s.rollNo);
 

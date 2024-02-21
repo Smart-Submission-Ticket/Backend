@@ -3,7 +3,7 @@ const _ = require("lodash");
 
 const { StudentRecord } = require("../models/student_record");
 const { Batch } = require("../models/batch");
-const { AllowedStudents } = require("../models/allowed_student");
+const { StudentData } = require("../models/student_data");
 const auth = require("../middleware/auth");
 const teacher = require("../middleware/teacher");
 
@@ -12,9 +12,10 @@ const router = express.Router();
 router.get("/", auth, async (req, res, next) => {
   try {
     const [student, record] = await Promise.all([
-      AllowedStudents.findOne({ rollNo: req.user.rollNo }).select("-_id -__v"),
+      StudentData.findOne({ email: req.user.email }).select("-_id -__v"),
       StudentRecord.findOne({ rollNo: req.user.rollNo }).select("-_id -__v"),
     ]);
+
     if (!record) return res.status(404).send({ message: "Record not found" });
 
     const unitTests = {};
@@ -28,7 +29,7 @@ router.get("/", auth, async (req, res, next) => {
     }
 
     res.send({
-      ..._.pick(student, ["rollNo", "email", "batch", "class", "year"]),
+      ..._.pick(student, ["rollNo", "name", "email", "batch", "class", "year"]),
       ..._.pick(record, ["attendance", "attendanceAlternate", "assignments"]),
       unitTests,
     });
@@ -45,7 +46,7 @@ router.get("/rollNo/:rollNo", teacher, async (req, res, next) => {
       return res.status(400).send({ message: "Roll no not provided" });
 
     const [student, record] = await Promise.all([
-      AllowedStudents.findOne({ rollNo }).select("-_id -__v"),
+      StudentData.findOne({ rollNo }).select("-_id -__v"),
       StudentRecord.findOne({ rollNo }).select("-_id -__v"),
     ]);
     if (!record) return res.status(404).send({ message: "Record not found" });
@@ -61,7 +62,7 @@ router.get("/rollNo/:rollNo", teacher, async (req, res, next) => {
     }
 
     res.send({
-      ..._.pick(student, ["rollNo", "email", "batch", "class", "year"]),
+      ..._.pick(student, ["rollNo", "name", "email", "batch", "class", "year"]),
       ..._.pick(record, ["attendance", "attendanceAlternate", "assignments"]),
       unitTests,
     });
@@ -80,7 +81,7 @@ router.get("/batch/:batch", teacher, async (req, res, next) => {
     if (!batchDoc) return res.status(404).send({ message: "Batch not found" });
 
     const [students, records] = await Promise.all([
-      AllowedStudents.find({ rollNo: { $in: batchDoc.rollNos } }).select(
+      StudentData.find({ rollNo: { $in: batchDoc.rollNos } }).select(
         "-_id -__v"
       ),
       StudentRecord.find({ rollNo: { $in: batchDoc.rollNos } }).select(
@@ -105,7 +106,7 @@ router.get("/batch/:batch", teacher, async (req, res, next) => {
       }
 
       response[student.rollNo] = {
-        ..._.pick(student, ["email", "batch", "class", "year"]),
+        ..._.pick(student, ["email", "name", "batch", "class", "year"]),
         ..._.pick(record, ["attendance", "attendanceAlternate", "assignments"]),
         unitTests,
       };

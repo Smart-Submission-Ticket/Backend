@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const { JWT_PRIVATE_KEY, NODE_ENV } = require("../config");
-const { Student } = require("../models/student");
+const { StudentLogin } = require("../models/student_login");
 const { Teacher } = require("../models/teacher");
 
 module.exports = async function (req, res, next) {
@@ -18,7 +18,7 @@ module.exports = async function (req, res, next) {
     const decoded = jwt.verify(token, JWT_PRIVATE_KEY);
 
     if (decoded.role === "student") {
-      const student = await Student.findById(decoded._id);
+      const student = await StudentLogin.findById(decoded._id);
 
       if (!student)
         return res.status(401).send({
