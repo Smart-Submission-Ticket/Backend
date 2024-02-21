@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
-const allowedStudentsSchema = new mongoose.Schema({
+const studentDataSchema = new mongoose.Schema({
+  name: {
+    type: String,
+  },
   email: {
     type: String,
     required: true,
@@ -23,11 +26,14 @@ const allowedStudentsSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  mobile: {
+    type: String,
+  },
+  abcId: {
+    type: String,
+  },
 });
 
-const AllowedStudents = mongoose.model(
-  "AllowedStudents",
-  allowedStudentsSchema
-);
+const StudentData = mongoose.model("StudentData", studentDataSchema);
 
-exports.AllowedStudents = AllowedStudents;
+exports.StudentData = StudentData;
