@@ -8,7 +8,6 @@ DEV_DB_NAME = process.env.DEV_DB_NAME;
 PROD_DB_NAME = process.env.PROD_DB_NAME;
 
 JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY;
-AUTH_REQUIRED = process.env.AUTH_REQUIRED == "true";
 
 EMAIL_HOST = process.env.EMAIL_HOST;
 EMAIL_PORT = process.env.EMAIL_PORT;
@@ -32,7 +31,6 @@ module.exports = {
   DEV_DB_NAME,
   PROD_DB_NAME,
   JWT_PRIVATE_KEY,
-  AUTH_REQUIRED,
   EMAIL_HOST,
   EMAIL_PORT,
   EMAIL_USER,

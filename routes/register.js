@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const { JWT_PRIVATE_KEY } = require("../config");
-const { AllowedStudents } = require("../models/allowed_students");
+const { AllowedStudents } = require("../models/allowed_student");
 const { OTP } = require("../models/otp");
 const { Student, validate } = require("../models/student");
 const { Batch } = require("../models/batch");
@@ -30,17 +30,25 @@ const checkIfStudentAllowed = async (req, res, next) => {
 
 router.post("/verify-email", checkIfStudentAllowed, async (req, res, next) => {
   try {
-    const member = _.pick(req.body, ["email"]);
+    const { email } = _.pick(req.body, ["email"]);
+
+    const student = await Student.findOne({
+      email: email,
+    });
+
+    if (student)
+      return res.status(400).send({ message: "Student already registered." });
+
     const otp = generateOtp();
 
     const newOtp = new OTP({
-      email: member.email,
+      email: email,
       otp: otp,
     });
 
-    sendRegistrationOtpMail(member.email, otp);
-
+    sendRegistrationOtpMail(email, otp);
     await newOtp.save();
+
     res.status(200).send({
       message: "Registration OTP sent successfully.",
       student: req.body.student,
@@ -65,7 +73,6 @@ router.post("/verify-otp", async (req, res, next) => {
       return res.status(400).send({ message: "Incorrect OTP." });
 
     await OTP.deleteMany({ email: email });
-
     const token = jwt.sign({ email: email }, JWT_PRIVATE_KEY);
 
     res.status(200).send({

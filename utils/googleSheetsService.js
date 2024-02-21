@@ -28,13 +28,13 @@ async function getAuthToken() {
   return authToken;
 }
 
-async function _getSpreadSheetValues(spreadsheetId) {
+async function _getSpreadSheetValues(spreadsheetId, range = "Sheet1") {
   const auth = await getAuthToken();
 
   const res = sheets.spreadsheets.values.get({
     auth,
     spreadsheetId,
-    range: "Sheet1",
+    range,
     majorDimension: "COLUMNS",
   });
 
@@ -47,8 +47,15 @@ async function getStudentsSpreadSheetValues() {
 }
 
 async function getCurriculumSpreadSheetValues() {
-  const res = await _getSpreadSheetValues(CURRICULUM_SHEET_ID);
-  return res.data.values;
+  const [theory, practical] = await Promise.all([
+    _getSpreadSheetValues(CURRICULUM_SHEET_ID, "Theory"),
+    _getSpreadSheetValues(CURRICULUM_SHEET_ID, "Practical"),
+  ]);
+
+  return {
+    theory: theory.data.values,
+    practical: practical.data.values,
+  };
 }
 
 async function getAttendanceSpreadSheetValues() {
