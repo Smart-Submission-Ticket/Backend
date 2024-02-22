@@ -64,6 +64,7 @@ router.get("/rollNo/:rollNo", teacher, async (req, res, next) => {
     const [student, record, batch] = await Promise.all([
       StudentData.findOne({ rollNo }).select("-_id -__v"),
       StudentRecord.findOne({ rollNo }).select("-_id -__v"),
+      Batch.findOne({ rollNos: rollNo }).select("-_id -__v"),
     ]);
     if (!record) return res.status(404).send({ message: "Record not found" });
 
