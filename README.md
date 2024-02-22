@@ -175,7 +175,7 @@
 
 ### Excel data
 
-1. `GET /api/fetch/claases`
+1. `GET /api/fetch/classes`
 
    - Will fetch all the classes and batches from google sheets.
 
@@ -348,10 +348,10 @@
 
 4.  `GET /api/records/class/:class`
 
-        - Will fetch all the records for a class.
+    - Will fetch all the records for a class.
 
-        - Request headers:
-        - `x-auth-token`: "jwt-token for teacher authentication"
+    - Request headers:
+      - `x-auth-token`: "jwt-token for teacher authentication"
 
 5.  `GET /api/records/batch/:batch/subject/:subject`
 
