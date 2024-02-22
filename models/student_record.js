@@ -4,6 +4,7 @@ const studentRecordSchema = new mongoose.Schema({
   rollNo: {
     type: String,
     required: true,
+    index: true,
   },
   attendance: {
     type: Number,

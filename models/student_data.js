@@ -13,6 +13,7 @@ const studentDataSchema = new mongoose.Schema({
   rollNo: {
     type: String,
     required: true,
+    index: true,
   },
   batch: {
     type: String,
