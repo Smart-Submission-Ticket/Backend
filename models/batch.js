@@ -4,6 +4,7 @@ const batchSchema = new mongoose.Schema({
   batch: {
     type: String,
     required: true,
+    index: true,
   },
   class: {
     type: String,

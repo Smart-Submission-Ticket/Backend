@@ -7,15 +7,18 @@ const { JWT_PRIVATE_KEY } = require("../config");
 const teacherSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
     required: true,
+    index: true,
   },
   password: {
     type: String,
-    required: true,
+  },
+  isRegistered: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -31,9 +34,9 @@ const Teacher = mongoose.model("Teacher", teacherSchema);
 
 function validateTeacher(teacher) {
   const schema = {
-    name: Joi.string().required(),
-    email: Joi.string().required(),
-    password: Joi.string().required(),
+    name: Joi.string(),
+    email: Joi.string().required().email(),
+    password: Joi.string(),
   };
   return Joi.validate(teacher, schema);
 }

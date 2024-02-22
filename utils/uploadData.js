@@ -2,6 +2,7 @@ const { Classes } = require("../models/classes");
 const { StudentData } = require("../models/student_data");
 const { StudentRecord } = require("../models/student_record");
 const { Batch } = require("../models/batch");
+const { Teacher } = require("../models/teacher");
 
 const uploadClassesData = async (classes) => {
   const newClasses = [];
@@ -90,13 +91,17 @@ const uploadStudentsData = async (students) => {
 };
 
 const uploadCurriculumData = async (curriculum) => {
-  const [classes, studentDatas, batchDocs] = await Promise.all([
+  const [classes, studentDatas, batchDocs, teachers] = await Promise.all([
     Classes.find(),
     StudentData.find(),
     Batch.find(),
+    Teacher.find(),
   ]);
 
   const [theory, practical] = [curriculum.theory, curriculum.practical];
+
+  const teacherEmails = teachers.map((t) => t.email);
+  const newTeachers = [];
 
   const theorySubjects = {};
 
@@ -117,6 +122,12 @@ const uploadCurriculumData = async (curriculum) => {
       const teacherEmail = theory[i][j];
 
       if (teacherEmail === "") continue;
+
+      if (!teacherEmails.includes(teacherEmail)) {
+        newTeachers.push({
+          email: teacherEmail,
+        });
+      }
 
       batches.forEach((batch) => {
         if (theorySubjects[batch] === undefined) {
@@ -147,6 +158,12 @@ const uploadCurriculumData = async (curriculum) => {
       const teacherEmail = practical[i][j];
 
       if (teacherEmail === "") continue;
+
+      if (!teacherEmails.includes(teacherEmail)) {
+        newTeachers.push({
+          email: teacherEmail,
+        });
+      }
 
       if (practicalSubjects[batch] === undefined) {
         practicalSubjects[batch] = [];
@@ -185,15 +202,18 @@ const uploadCurriculumData = async (curriculum) => {
     });
   }
 
-  await Batch.bulkWrite(
-    newBatches.map((b) => ({
-      updateOne: {
-        filter: { batch: b.batch },
-        update: b,
-        upsert: true,
-      },
-    }))
-  );
+  await Promise.all([
+    Batch.bulkWrite(
+      newBatches.map((b) => ({
+        updateOne: {
+          filter: { batch: b.batch },
+          update: b,
+          upsert: true,
+        },
+      }))
+    ),
+    Teacher.insertMany(newTeachers),
+  ]);
 };
 
 const uploadAttendanceData = async (attendance) => {
