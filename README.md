@@ -4,7 +4,7 @@
 
 ### Student Registration
 
-1. `POST /api/register/student/verify-email`
+1. `POST /register/student/verify-email`
 
    - Request Body:
 
@@ -22,7 +22,7 @@
      }
      ```
 
-2. `POST /api/register/student/verify-otp`
+2. `POST /register/student/verify-otp`
 
    - Request Body:
 
@@ -42,7 +42,7 @@
      }
      ```
 
-3. `POST /api/register/student`
+3. `POST /register/student`
 
    - Request Body:
 
@@ -56,7 +56,7 @@
        "class": "TE09",
        "year": 3,
        "abcId": "I2K21103412",
-       "token": "jwt-token from /api/register/student/verify-otp"
+       "token": "jwt-token from /register/student/verify-otp"
      }
      ```
 
@@ -73,7 +73,7 @@
 
 ### Teacher Registration
 
-1. `POST /api/register/teacher/verify-email`
+1. `POST /register/teacher/verify-email`
 
    - Request Body:
 
@@ -90,7 +90,7 @@
      }
      ```
 
-2. `POST /api/register/teacher/verify-otp`
+2. `POST /register/teacher/verify-otp`
 
    - Request Body:
 
@@ -109,7 +109,7 @@
      }
      ```
 
-3. `POST /api/register/teacher`
+3. `POST /register/teacher`
 
    - Request Body:
 
@@ -118,7 +118,7 @@
        "email": "abc@gmail.com",
        "password": "password",
        "name": "John Doe",
-       "token": "jwt-token from /api/register/teacher/verify-otp"
+       "token": "jwt-token from /register/teacher/verify-otp"
      }
      ```
 
@@ -133,7 +133,7 @@
 
 ### Login
 
-1. `POST /api/login/student`
+1. `POST /login/student`
 
    - Request Body:
 
@@ -153,7 +153,7 @@
    - Response headers:
      - `x-auth-token`: "jwt-token for student authentication"
 
-2. `POST /api/login/teacher`
+2. `POST /login/teacher`
 
    - Request Body:
 
@@ -175,23 +175,23 @@
 
 ### Excel data
 
-1. `GET /api/fetch/classes`
+1. `POST /fetch/classes`
 
    - Will fetch all the classes and batches from google sheets.
 
-2. `GET /api/fetch/students`
+2. `POST /fetch/students`
 
    - Will fetch all the students from google sheets.
 
-3. `GET /api/fetch/curriculum`
+3. `POST /fetch/curriculum`
 
    - Will fetch all the curriculum from google sheets.
 
-4. `GET /api/fetch/attendance`
+4. `POST /fetch/attendance`
 
    - Will fetch all the attendance from google sheets.
 
-5. `POST /api/submit/classes`
+5. `POST /submit/classes`
 
    - Will fetch all the classes and batches from excel file.
 
@@ -203,7 +203,7 @@
      }
      ```
 
-6. `POST /api/submit/students`
+6. `POST /submit/students`
 
    - Will fetch all the students from excel file.
 
@@ -215,7 +215,7 @@
      }
      ```
 
-7. `POST /api/submit/curriculum`
+7. `POST /submit/curriculum`
 
    - Will fetch all the curriculum from excel file.
 
@@ -227,7 +227,7 @@
      }
      ```
 
-8. `POST /api/submit/attendance`
+8. `POST /submit/attendance`
 
    - Will fetch all the attendance from excel file.
 
@@ -239,7 +239,7 @@
      }
      ```
 
-9. `POST /api/submit/assignments`
+9. `POST /submit/assignments`
 
    - Will fetch all the assignments from excel file.
 
@@ -252,7 +252,7 @@
      }
      ```
 
-10. `POST /api/submit/utmarks`
+10. `POST /submit/utmarks`
 
     - Will fetch all the unit test marks from excel file.
 
@@ -267,7 +267,7 @@
 
 ### Classes and Batches
 
-1.  `GET /api/classes`
+1.  `GET /classes`
 
     - Will fetch all the classes and batches.
 
@@ -293,7 +293,7 @@
     }
     ```
 
-2.  `GET /api/classes/subjects`
+2.  `GET /classes/subjects`
 
     - Will fetch all the subjects for a class and batch.
 
@@ -325,42 +325,42 @@
 
 ### Records
 
-1.  `GET /api/records`
+1.  `GET /records`
 
     - Will fetch all the records for a student.
 
     - Request headers:
       - `x-auth-token`: "jwt-token for student authentication"
 
-2.  `GET /api/records/rollNo/:rollNo`
+2.  `GET /records/rollNo/:rollNo`
 
     - Will fetch all the records for a student with roll number.
 
     - Request headers:
       - `x-auth-token`: "jwt-token for teacher authentication"
 
-3.  `GET /api/records/batch/:batch`
+3.  `GET /records/batch/:batch`
 
     - Will fetch all the records for a batch.
 
     - Request headers:
       - `x-auth-token`: "jwt-token for teacher authentication"
 
-4.  `GET /api/records/class/:class`
+4.  `GET /records/class/:class`
 
     - Will fetch all the records for a class.
 
     - Request headers:
       - `x-auth-token`: "jwt-token for teacher authentication"
 
-5.  `GET /api/records/batch/:batch/subject/:subject`
+5.  `GET /records/batch/:batch/subject/:subject`
 
     - Will fetch all the records for a batch and subject.
 
     - Request headers:
       - `x-auth-token`: "jwt-token for teacher authentication"
 
-6.  `GET /api/records/class/:class/subject/:subject`
+6.  `GET /records/class/:class/subject/:subject`
 
     - Will fetch all the records for a class and subject.
 

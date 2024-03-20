@@ -16,7 +16,7 @@ const {
 
 const router = express.Router();
 
-router.get("/classes", async (req, res, next) => {
+router.post("/classes", async (req, res, next) => {
   try {
     const classes = await getClassesSpreadSheetValues();
     await uploadClassesData(classes);
@@ -27,7 +27,7 @@ router.get("/classes", async (req, res, next) => {
   }
 });
 
-router.get("/students", async (req, res, next) => {
+router.post("/students", async (req, res, next) => {
   try {
     const students = await getStudentsSpreadSheetValues();
     await uploadStudentsData(students);
@@ -38,7 +38,7 @@ router.get("/students", async (req, res, next) => {
   }
 });
 
-router.get("/curriculum", async (req, res, next) => {
+router.post("/curriculum", async (req, res, next) => {
   try {
     const curriculum = await getCurriculumSpreadSheetValues();
     await uploadCurriculumData(curriculum);
@@ -49,7 +49,7 @@ router.get("/curriculum", async (req, res, next) => {
   }
 });
 
-router.get("/attendance", async (req, res, next) => {
+router.post("/attendance", async (req, res, next) => {
   try {
     const attendance = await getAttendanceSpreadSheetValues();
     await uploadAttendanceData(attendance);

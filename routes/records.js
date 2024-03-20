@@ -109,7 +109,9 @@ router.get("/batch/:batch", teacher, async (req, res, next) => {
     const { batch } = req.params;
     if (!batch) return res.status(400).send({ message: "Batch not provided" });
 
-    const batchDoc = await Batch.findOne({ batch }).select("-_id -__v");
+    const batchDoc = await Batch.findOne({
+      batch: { $regex: new RegExp(`^${batch}$`, "i") },
+    }).select("-_id -__v");
     if (!batchDoc) return res.status(404).send({ message: "Batch not found" });
 
     const [students, records] = await Promise.all([
@@ -177,13 +179,15 @@ router.get("/class/:class", teacher, async (req, res, next) => {
     if (!className)
       return res.status(400).send({ message: "Class not provided" });
 
-    const batchDocs = await Batch.find({ class: className }).select(
-      "-_id -__v"
-    );
+    const batchDocs = await Batch.find({
+      class: { $regex: new RegExp(`^${className}$`, "i") },
+    }).select("-_id -__v");
     if (!batchDocs) return res.status(404).send({ message: "Class not found" });
 
     const [students, records] = await Promise.all([
-      StudentData.find({ class: className }).select("-_id -__v"),
+      StudentData.find({
+        class: { $regex: new RegExp(`^${className}$`, "i") },
+      }).select("-_id -__v"),
       StudentRecord.find({
         rollNo: { $in: batchDocs.map((b) => b.rollNos).flat() },
       }).select("-_id -__v"),
@@ -252,7 +256,9 @@ router.get(
           .status(400)
           .send({ message: "Batch or subject not provided" });
 
-      const batchDoc = await Batch.findOne({ batch }).select("-_id -__v");
+      const batchDoc = await Batch.findOne({
+        batch: { $regex: new RegExp(`^${batch}$`, "i") },
+      }).select("-_id -__v");
       if (!batchDoc)
         return res.status(404).send({ message: "Batch not found" });
 
@@ -326,14 +332,16 @@ router.get(
           .status(400)
           .send({ message: "Class or subject not provided" });
 
-      const batchDocs = await Batch.find({ class: className }).select(
-        "-_id -__v"
-      );
+      const batchDocs = await Batch.find({
+        class: { $regex: new RegExp(`^${className}$`, "i") },
+      }).select("-_id -__v");
       if (!batchDocs)
         return res.status(404).send({ message: "Class not found" });
 
       const [students, records] = await Promise.all([
-        StudentData.find({ class: className }).select("-_id -__v"),
+        StudentData.find({
+          class: { $regex: new RegExp(`^${className}$`, "i") },
+        }).select("-_id -__v"),
         StudentRecord.find({
           rollNo: { $in: batchDocs.map((b) => b.rollNos).flat() },
         }).select("-_id -__v"),
