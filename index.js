@@ -4,12 +4,12 @@ const { PORT } = require("./config");
 
 const app = express();
 
-app.get("/", (_, res) => res.send("Welcome to Smart Submission Ticket API"));
-
 require("./startup/cors")(app);
-require("./startup/routes")(app);
 require("./startup/db")();
 require("./startup/config")();
+
+app.get("/", (_, res) => res.status(200).send("Smart Submission Ticket API"));
+require("./startup/routes")(app);
 
 const server = app.listen(PORT, () =>
   console.log(`Listening on port ${PORT}...`)
