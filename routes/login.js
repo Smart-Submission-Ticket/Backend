@@ -24,7 +24,10 @@ router.post("/student", async (req, res, next) => {
     const x_auth_token = student.generateAuthToken();
     res.header("x-auth-token", x_auth_token).send({
       message: "Login successful.",
-      student: student,
+      student: {
+        email: student.email,
+        rollNo: student.rollNo,
+      },
     });
   } catch (err) {
     console.log(err);
@@ -50,7 +53,10 @@ router.post("/teacher", async (req, res, next) => {
     const x_auth_token = teacher.generateAuthToken();
     res.header("x-auth-token", x_auth_token).send({
       message: "Login successful.",
-      teacher: teacher,
+      teacher: {
+        email: teacher.email,
+        name: teacher.name,
+      },
     });
   } catch (err) {
     console.log(err);
