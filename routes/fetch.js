@@ -16,48 +16,28 @@ const {
 
 const router = express.Router();
 
-router.post("/classes", async (req, res, next) => {
-  try {
-    const classes = await getClassesSpreadSheetValues();
-    await uploadClassesData(classes);
-    res.send({ message: "Classes updated." });
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
+router.post("/classes", async (req, res) => {
+  const classes = await getClassesSpreadSheetValues();
+  await uploadClassesData(classes);
+  res.send({ message: "Classes updated." });
 });
 
-router.post("/students", async (req, res, next) => {
-  try {
-    const students = await getStudentsSpreadSheetValues();
-    await uploadStudentsData(students);
-    res.send({ message: "Allowed students updated." });
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
+router.post("/students", async (req, res) => {
+  const students = await getStudentsSpreadSheetValues();
+  await uploadStudentsData(students);
+  res.send({ message: "Allowed students updated." });
 });
 
-router.post("/curriculum", async (req, res, next) => {
-  try {
-    const curriculum = await getCurriculumSpreadSheetValues();
-    await uploadCurriculumData(curriculum);
-    res.send({ message: "Curriculum updated." });
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
+router.post("/curriculum", async (req, res) => {
+  const curriculum = await getCurriculumSpreadSheetValues();
+  await uploadCurriculumData(curriculum);
+  res.send({ message: "Curriculum updated." });
 });
 
-router.post("/attendance", async (req, res, next) => {
-  try {
-    const attendance = await getAttendanceSpreadSheetValues();
-    await uploadAttendanceData(attendance);
-    res.send({ message: "Attendance updated." });
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
+router.post("/attendance", async (req, res) => {
+  const attendance = await getAttendanceSpreadSheetValues();
+  await uploadAttendanceData(attendance);
+  res.send({ message: "Attendance updated." });
 });
 
 module.exports = router;

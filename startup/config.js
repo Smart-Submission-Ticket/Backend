@@ -1,7 +1,8 @@
-const { JWT_PRIVATE_KEY } = require("../config");
+const assert = require("assert");
+
+const { DB_URL, JWT_PRIVATE_KEY } = require("../config");
 
 module.exports = function () {
-  if (!JWT_PRIVATE_KEY) {
-    throw new Error("FATAL ERROR: JWT_PRIVATE_KEY is not defined.");
-  }
+  assert(DB_URL, "FATAL ERROR: DB_URL is not defined.");
+  assert(JWT_PRIVATE_KEY, "FATAL ERROR: JWT_PRIVATE_KEY is not defined.");
 };

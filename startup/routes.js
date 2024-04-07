@@ -1,4 +1,5 @@
 const express = require("express");
+require("express-async-errors");
 
 const registerStudent = require("../routes/register_student");
 const registerTeacher = require("../routes/register_teacher");
