@@ -11,10 +11,7 @@ const {
 
 const sheets = google.sheets("v4");
 
-const SCOPES = [
-  "https://www.googleapis.com/auth/spreadsheets",
-  "https://www.googleapis.com/auth/spreadsheets.readonly",
-];
+const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
 
 async function getAuthToken() {
   const auth = new google.auth.GoogleAuth({
@@ -68,9 +65,56 @@ async function getClassesSpreadSheetValues() {
   return res.data.values;
 }
 
+async function updateAttendanceSpreadSheetValues(attendance) {
+  const [pastAttendance, auth] = await Promise.all([
+    getAttendanceSpreadSheetValues(),
+    getAuthToken(),
+  ]);
+
+  const rollNoToValue = {};
+  attendance.forEach((a) => {
+    rollNoToValue[a.rollNo] = a.value;
+  });
+
+  const newAttendance = [];
+
+  for (let i = 0; i < pastAttendance.length; i++) {
+    for (let j = 0; j < pastAttendance[i].length; j++) {
+      const rollNo = pastAttendance[i][j];
+      if (rollNo in rollNoToValue) {
+        newAttendance.push({
+          row: i + 1,
+          column: j,
+          value: rollNoToValue[rollNo],
+        });
+      }
+    }
+  }
+
+  const updateValues = newAttendance.map((a) => {
+    return {
+      range: `${String.fromCharCode(65 + a.row)}${a.column + 1}`,
+      values: [[a.value]],
+      majorDimension: "COLUMNS",
+    };
+  });
+
+  const res = sheets.spreadsheets.values.batchUpdate({
+    auth,
+    spreadsheetId: ATTENDANCE_SHEET_ID,
+    resource: {
+      data: updateValues,
+      valueInputOption: "USER_ENTERED",
+    },
+  });
+
+  return res;
+}
+
 module.exports = {
   getStudentsSpreadSheetValues,
   getCurriculumSpreadSheetValues,
   getAttendanceSpreadSheetValues,
   getClassesSpreadSheetValues,
+  updateAttendanceSpreadSheetValues,
 };

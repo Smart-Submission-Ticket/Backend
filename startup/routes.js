@@ -6,8 +6,9 @@ const registerTeacher = require("../routes/register_teacher");
 const login = require("../routes/login");
 const fetch = require("../routes/fetch");
 const submit = require("../routes/submit");
-const records = require("../routes/records");
 const classes = require("../routes/classes");
+const records = require("../routes/records");
+const update = require("../routes/records_update");
 
 const teacher = require("../middleware/teacher");
 const error = require("../middleware/error");
@@ -20,7 +21,8 @@ module.exports = function (app) {
   app.use("/login", login);
   app.use("/fetch", teacher, fetch);
   app.use("/submit", teacher, submit);
-  app.use("/records", records);
   app.use("/classes", teacher, classes);
+  app.use("/records", records);
+  app.use("/records/update", teacher, update);
   app.use(error);
 };
