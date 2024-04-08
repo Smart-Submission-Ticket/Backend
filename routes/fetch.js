@@ -5,14 +5,14 @@ const {
   getStudentsSpreadSheetValues,
   getCurriculumSpreadSheetValues,
   getAttendanceSpreadSheetValues,
-} = require("../utils/googleSheetsService");
+} = require("../utils/google_sheets_service");
 
 const {
   uploadClassesData,
   uploadStudentsData,
   uploadCurriculumData,
   uploadAttendanceData,
-} = require("../utils/uploadData");
+} = require("../utils/upload_data");
 
 const router = express.Router();
 

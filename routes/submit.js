@@ -2,7 +2,7 @@ const express = require("express");
 const assert = require("assert");
 
 const upload = require("../middleware/files");
-const readExcel = require("../utils/readExcel");
+const read_excel = require("../utils/read_excel");
 const {
   uploadClassesData,
   uploadStudentsData,
@@ -10,7 +10,7 @@ const {
   uploadAttendanceData,
   uploadAssignmentsData,
   uploadUTMarksData,
-} = require("../utils/uploadData");
+} = require("../utils/upload_data");
 
 const router = express.Router();
 
