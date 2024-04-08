@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const { JWT_PRIVATE_KEY } = require("../config");
 const { OTP } = require("../models/otp");
-const { generateOtp, sendRegistrationOtpMail } = require("../utils/sendMail");
+const { generateOtp, sendRegistrationOtpMail } = require("../utils/send_mail");
 const { Teacher } = require("../models/teacher");
 
 const router = express.Router();

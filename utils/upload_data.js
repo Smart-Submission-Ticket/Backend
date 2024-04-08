@@ -4,6 +4,8 @@ const { StudentRecord } = require("../models/student_record");
 const { Batch } = require("../models/batch");
 const { Teacher } = require("../models/teacher");
 
+const { isValidAttendance, isValidUTMarks } = require("./valid_records");
+
 const uploadClassesData = async (classes) => {
   const newClasses = [];
 
@@ -238,7 +240,7 @@ const uploadAttendanceData = async (attendance) => {
         newAttendances.push({
           rollNo: _rollNo,
           attendance: _attendance,
-          attendanceAlternate: parseFloat(_attendance) >= 75,
+          attendanceAlternate: isValidAttendance(_attendance),
         });
       }
     }
@@ -351,7 +353,7 @@ const uploadUTMarksData = async (subject, utMarks) => {
 
     for (let j = 1; j < utMarks.length; j++) {
       _utMarks.push(utMarks[j][i + 1]);
-      _utMarksAlternate.push(parseFloat(utMarks[j][i + 1]) >= 12);
+      _utMarksAlternate.push(isValidUTMarks(utMarks[j][i + 1]));
     }
 
     newUTMarks.push({

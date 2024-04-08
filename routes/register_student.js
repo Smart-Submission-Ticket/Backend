@@ -9,7 +9,7 @@ const { StudentData } = require("../models/student_data");
 const { OTP } = require("../models/otp");
 const { StudentLogin, validate } = require("../models/student_login");
 const { Batch } = require("../models/batch");
-const { generateOtp, sendRegistrationOtpMail } = require("../utils/sendMail");
+const { generateOtp, sendRegistrationOtpMail } = require("../utils/send_mail");
 
 const router = express.Router();
 
