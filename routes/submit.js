@@ -2,7 +2,7 @@ const express = require("express");
 const assert = require("assert");
 
 const upload = require("../middleware/files");
-const read_excel = require("../utils/read_excel");
+const readExcel = require("../utils/read_excel");
 const {
   uploadClassesData,
   uploadStudentsData,
