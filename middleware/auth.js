@@ -1,13 +1,11 @@
 const jwt = require("jsonwebtoken");
 
-const { JWT_PRIVATE_KEY, NODE_ENV } = require("../config");
+const { JWT_PRIVATE_KEY } = require("../config");
 const { StudentLogin } = require("../models/student_login");
 const { Teacher } = require("../models/teacher");
 
 module.exports = async function (req, res, next) {
   try {
-    // if (NODE_ENV === "development") return next();
-
     const token = req.header("x-auth-token");
     if (!token)
       return res.status(401).send({
