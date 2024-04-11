@@ -301,6 +301,8 @@ const uploadAssignmentsData = async (subject, assignments) => {
     });
   }
 
+  console.log(newAssignments);
+
   const studentRecords = await StudentRecord.find().select("-_id -__v");
   const newStudentRecords = [];
   const brandNewStudentRecords = [];

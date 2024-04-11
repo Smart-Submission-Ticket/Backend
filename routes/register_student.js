@@ -32,10 +32,7 @@ router.post("/verify-email", checkIfStudentAllowed, async (req, res) => {
   assert(!student, "ERROR 400: Student already registered.");
 
   const otp = generateOtp();
-  const newOtp = new OTP({
-    email: email,
-    otp: otp,
-  });
+  const newOtp = new OTP({ email, otp });
 
   sendRegistrationOtpMail(email, otp);
   await newOtp.save();

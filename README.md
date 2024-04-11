@@ -55,6 +55,7 @@
        "batch": "N9",
        "class": "TE09",
        "year": 3,
+       "mobile": "1234567890",
        "abcId": "I2K21103412",
        "token": "jwt-token from /register/student/verify-otp"
      }
@@ -133,7 +134,31 @@
 
 ### Login
 
-1. `POST /login/student`
+1 `POST /login`
+
+- Request Body:
+
+  ```json
+  {
+    "email": "abc@gmail.com",
+    "password": "password"
+  }
+  ```
+
+- Response:
+  ```json
+  {
+    "message": "Logged in successfully",
+    "role": "student/teacher",
+    "user": {
+      "email": "abc@gmail.com",
+      "name": "John Doe", // for teacher
+      "rollNo": "123456" // for student
+    }
+  }
+  ```
+
+2. `POST /login/student`
 
    - Request Body:
 
@@ -153,7 +178,7 @@
    - Response headers:
      - `x-auth-token`: "jwt-token for student authentication"
 
-2. `POST /login/teacher`
+3. `POST /login/teacher`
 
    - Request Body:
 
@@ -172,6 +197,65 @@
      ```
    - Response headers:
      - `x-auth-token`: "jwt-token for teacher authentication"
+
+### Forgot Password
+
+1. `POST /login/forgot-password`
+
+   - Request Body:
+
+   ```json
+   {
+     "email": "abc@gmail.com"
+   }
+   ```
+
+   - Response:
+
+   ```json
+   {
+     "message": "OTP sent successfully"
+   }
+   ```
+
+2. `POST /login/verify-otp`
+
+   - Request Body:
+
+   ```json
+   {
+     "email": "abc@gmail.com",
+     "otp": "123456"
+   }
+   ```
+
+   - Response:
+
+   ```json
+   {
+     "message": "OTP verified",
+     "token": "jwt-token for password reset"
+   }
+   ```
+
+3. `POST /login/reset-password`
+
+   - Request Body:
+
+   ```json
+   {
+     "token": "jwt-token from /login/verify-otp",
+     "password": "newpassword"
+   }
+   ```
+
+   - Response:
+
+   ```json
+   {
+     "message": "Password reset successfully"
+   }
+   ```
 
 ### Excel data
 
@@ -366,3 +450,93 @@
 
     - Request headers:
       - `x-auth-token`: "jwt-token for teacher authentication"
+
+### Update Records
+
+1. `POST /records/update/attendance`
+
+   - Will update attendance for individual student.
+
+   - Request headers:
+
+     - `x-auth-token`: "jwt-token for teacher authentication"
+
+   - Request Body:
+
+   ```json
+   {
+     "attendance": [
+       { "rollNo": "123", "value": 90 },
+       { "rollNo": "456", "value": 80 }
+     ]
+   }
+   ```
+
+   - Response:
+
+   ```json
+   {
+     "message": "Attendance updated.",
+     "attendance": [
+       { "rollNo": "123", "value": 90 },
+       { "rollNo": "456", "value": 80 }
+     ]
+   }
+   ```
+
+2. `POST /records/update/utmarks/:subject`
+
+   - Will update unit test marks for individual student.
+
+   - Request headers:
+
+     - `x-auth-token`: "jwt-token for teacher authentication"
+
+   - Request Body:
+
+   ```json
+   {
+     "utmarks": [
+       {
+         "rollNo": "123",
+         "ut1": 23,
+         "ut2": 20,
+         "ut1Alternate": true,
+         "ut2Alternate": true
+       },
+       { "rollNo": "456", "ut1": 25 },
+       { "rollNo": "789", "ut1Alternate": true }
+     ]
+   }
+   ```
+
+   - Response:
+
+   ```json
+   {
+     "message": "UT marks updated.",
+     "utmarks": [
+       {
+         "rollNo": "123",
+         "ut1": 23,
+         "ut2": 20,
+         "ut1Alternate": true,
+         "ut2Alternate": true
+       },
+       {
+         "rollNo": "456",
+         "ut1": 25,
+         "ut2": 20,
+         "ut1Alternate": true,
+         "ut2Alternate": true
+       },
+       {
+         "rollNo": "789",
+         "ut1": 20,
+         "ut2": 20,
+         "ut1Alternate": true,
+         "ut2Alternate": true
+       }
+     ]
+   }
+   ```
