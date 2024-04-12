@@ -466,8 +466,8 @@
    ```json
    {
      "attendance": [
-       { "rollNo": "123", "value": 90 },
-       { "rollNo": "456", "value": 80 }
+       { "rollNo": "123", "attendance": 90, "attendanceAlternate": true },
+       { "rollNo": "456", "attendance": 88, "attendanceAlternate": true }
      ]
    }
    ```
@@ -478,8 +478,8 @@
    {
      "message": "Attendance updated.",
      "attendance": [
-       { "rollNo": "123", "value": 90 },
-       { "rollNo": "456", "value": 80 }
+       { "rollNo": "123", "attendance": 90 },
+       { "rollNo": "456", "attendanceAlternate": true }
      ]
    }
    ```

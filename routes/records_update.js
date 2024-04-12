@@ -16,8 +16,9 @@ router.post("/attendance", async (req, res) => {
 
   /*
   Valid attendance:
-  1. attendance: { rollNo: "123", value: 90 }
-  2. attendance: [{ rollNo: "123", value: 90 }, { rollNo: "456", value: 80 }]
+  1. attendance: { rollNo: "123", attendance: 90 }
+  2. attendance: { rollNo: "456", attendanceAlternate: true }
+  3. attendance: [{ rollNo: "123", attendance: 90 }, { rollNo: "456", attendanceAlternate: true }]
   */
 
   // Convert to array if not already
@@ -28,8 +29,19 @@ router.post("/attendance", async (req, res) => {
   // Check if all attendance values are valid
   attendance.forEach((a) => {
     assert(a.rollNo, "ERROR 400: rollNo is required");
-    assert(a.value, "ERROR 400: value is required");
-    assert(typeof a.value === "number", "ERROR 400: value must be a number");
+    assert(
+      a.attendance || a.attendanceAlternate,
+      "ERROR 400: attendance or attendanceAlternate is required"
+    );
+    assert(
+      a.attendance === undefined || typeof a.attendance === "number",
+      "ERROR 400: attendance must be a number"
+    );
+    assert(
+      a.attendanceAlternate === undefined ||
+        typeof a.attendanceAlternate === "boolean",
+      "ERROR 400: attendanceAlternate must be a boolean"
+    );
   });
 
   // Check if all roll numbers are valid
@@ -42,13 +54,38 @@ router.post("/attendance", async (req, res) => {
     `ERROR 400: Invalid roll numbers: ${invalidRollNos.join(", ")}`
   );
 
+  // Fill all missing values with values from the database
+  attendance = attendance.map((a) => {
+    const student = students.find((s) => s.rollNo === a.rollNo);
+
+    /*
+    attendanceAlternate calculation:
+    - If attendanceAlternate is provided, use that value
+    - If attendance is provided, use attendance >= 75
+    - If attendance is not provided, use student.attendance >= 75
+    */
+
+    const attendanceAlternate =
+      a.attendanceAlternate !== undefined
+        ? a.attendanceAlternate
+        : a.attendance !== undefined
+        ? isValidAttendance(a.attendance)
+        : isValidAttendance(student.attendance);
+
+    return {
+      rollNo: a.rollNo,
+      attendance: a.attendance || student.attendance,
+      attendanceAlternate,
+    };
+  });
+
   await StudentRecord.bulkWrite(
     attendance.map((a) => ({
       updateOne: {
         filter: { rollNo: a.rollNo },
         update: {
-          attendance: a.value,
-          attendanceAlternate: isValidAttendance(a.value),
+          attendance: a.attendance,
+          attendanceAlternate: a.attendanceAlternate,
         },
       },
     }))
