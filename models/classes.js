@@ -13,6 +13,9 @@ const classesSchema = new mongoose.Schema({
     type: [String],
     required: true,
   },
+  coordinator: {
+    type: String,
+  },
 });
 
 const Classes = mongoose.model("Classes", classesSchema);

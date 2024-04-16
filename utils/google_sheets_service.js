@@ -7,6 +7,11 @@ const {
   CURRICULUM_SHEET_ID,
   ATTENDANCE_SHEET_ID,
   CLASSES_SHEET_ID,
+  CC_SHEET_ID,
+  MENTORS_SHEET_ID,
+  TE_SEMINARS_SHEET_ID,
+  BE_PROJECTS_SHEET_ID,
+  HONORS_SHEET_ID,
 } = require("../config");
 
 const sheets = google.sheets("v4");
@@ -65,6 +70,31 @@ async function getClassesSpreadSheetValues() {
   return res.data.values;
 }
 
+async function getCCSpreadSheetValues() {
+  const res = await _getSpreadSheetValues(CC_SHEET_ID);
+  return res.data.values;
+}
+
+async function getMentorsSpreadSheetValues() {
+  const res = await _getSpreadSheetValues(MENTORS_SHEET_ID);
+  return res.data.values;
+}
+
+async function getTESeminarsSpreadSheetValues() {
+  const res = await _getSpreadSheetValues(TE_SEMINARS_SHEET_ID);
+  return res.data.values;
+}
+
+async function getBEProjectsSpreadSheetValues() {
+  const res = await _getSpreadSheetValues(BE_PROJECTS_SHEET_ID);
+  return res.data.values;
+}
+
+async function getHonorsSpreadSheetValues() {
+  const res = await _getSpreadSheetValues(HONORS_SHEET_ID);
+  return res.data.values;
+}
+
 async function updateAttendanceSpreadSheetValues(attendance) {
   const [pastAttendance, auth] = await Promise.all([
     getAttendanceSpreadSheetValues(),
@@ -116,5 +146,10 @@ module.exports = {
   getCurriculumSpreadSheetValues,
   getAttendanceSpreadSheetValues,
   getClassesSpreadSheetValues,
+  getCCSpreadSheetValues,
+  getMentorsSpreadSheetValues,
+  getTESeminarsSpreadSheetValues,
+  getBEProjectsSpreadSheetValues,
+  getHonorsSpreadSheetValues,
   updateAttendanceSpreadSheetValues,
 };

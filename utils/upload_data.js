@@ -1,12 +1,24 @@
+const assert = require("assert");
+
 const { Classes } = require("../models/classes");
 const { StudentData } = require("../models/student_data");
 const { StudentRecord } = require("../models/student_record");
 const { Batch } = require("../models/batch");
 const { Teacher } = require("../models/teacher");
 
-const { isValidAttendance, isValidUTMarks } = require("./valid_records");
+const {
+  isValidAttendance,
+  isValidUTMarks,
+  checkStudentsWithYear,
+} = require("./valid_records");
+
+const trimNestedArray = (arr) => {
+  return arr.map((a) => a.map((b) => b.trim()));
+};
 
 const uploadClassesData = async (classes) => {
+  classes = trimNestedArray(classes);
+
   const newClasses = [];
 
   let year = "";
@@ -42,6 +54,8 @@ const uploadClassesData = async (classes) => {
 };
 
 const uploadStudentsData = async (students) => {
+  students = trimNestedArray(students);
+
   const classes = await Classes.find();
   const newStudents = [];
 
@@ -93,6 +107,8 @@ const uploadStudentsData = async (students) => {
 };
 
 const uploadCurriculumData = async (curriculum) => {
+  curriculum = trimNestedArray(curriculum);
+
   const [classes, studentDatas, batchDocs, teachers] = await Promise.all([
     Classes.find(),
     StudentData.find(),
@@ -219,6 +235,8 @@ const uploadCurriculumData = async (curriculum) => {
 };
 
 const uploadAttendanceData = async (attendance) => {
+  attendance = trimNestedArray(attendance);
+
   const newAttendances = [];
   let rollNos = [];
   let avgAttendance = [];
@@ -234,7 +252,8 @@ const uploadAttendanceData = async (attendance) => {
         let _rollNo = rollNos[j];
         let _attendance = avgAttendance[j];
 
-        if (_rollNo === "" || _attendance === "") continue;
+        if (_rollNo === "") continue;
+        if (_attendance === "") _attendance = "0";
         _attendance = _attendance.replace("%", "").trim();
 
         newAttendances.push({
@@ -280,6 +299,9 @@ const uploadAttendanceData = async (attendance) => {
 };
 
 const uploadAssignmentsData = async (subject, assignments) => {
+  subject = subject.trim();
+  assignments = trimNestedArray(assignments);
+
   const rollNos = assignments
     .find((a) => a[0].trim().toLowerCase().includes("roll"))
     .slice(1);
@@ -287,12 +309,15 @@ const uploadAssignmentsData = async (subject, assignments) => {
   const newAssignments = [];
 
   for (let i = 0; i < rollNos.length; i++) {
+    if (rollNos[i] === "") continue;
     const rollNo = rollNos[i];
 
     const subjectAssignments = [];
 
     for (let j = 1; j < assignments.length; j++) {
-      subjectAssignments.push(assignments[j][i + 1]);
+      let assignmentMarks = assignments[j][i + 1];
+      if (!assignmentMarks || assignmentMarks === "") assignmentMarks = 0;
+      subjectAssignments.push(assignmentMarks);
     }
 
     newAssignments.push({
@@ -300,8 +325,6 @@ const uploadAssignmentsData = async (subject, assignments) => {
       subjectAssignments,
     });
   }
-
-  console.log(newAssignments);
 
   const studentRecords = await StudentRecord.find().select("-_id -__v");
   const newStudentRecords = [];
@@ -341,6 +364,9 @@ const uploadAssignmentsData = async (subject, assignments) => {
 };
 
 const uploadUTMarksData = async (subject, utMarks) => {
+  subject = subject.trim();
+  utMarks = trimNestedArray(utMarks);
+
   const rollNos = utMarks
     .find((a) => a[0].trim().toLowerCase().includes("roll"))
     .slice(1);
@@ -348,13 +374,16 @@ const uploadUTMarksData = async (subject, utMarks) => {
   const newUTMarks = [];
 
   for (let i = 0; i < rollNos.length; i++) {
+    if (rollNos[i] === "") continue;
     const rollNo = rollNos[i];
 
     const _utMarks = [];
     const _utMarksAlternate = [];
 
     for (let j = 1; j < utMarks.length; j++) {
-      _utMarks.push(utMarks[j][i + 1]);
+      let utMark = utMarks[j][i + 1];
+      if (!utMark || utMark === "") utMark = 0;
+      _utMarks.push(utMark);
       _utMarksAlternate.push(isValidUTMarks(utMarks[j][i + 1]));
     }
 
@@ -420,6 +449,212 @@ const uploadUTMarksData = async (subject, utMarks) => {
   ]);
 };
 
+const uploadCCData = async (cc) => {
+  cc = trimNestedArray(cc);
+
+  const classes = await Classes.find();
+  const newCCs = [];
+
+  for (let i = 0; i < cc.length; i++) {
+    if (cc[i][1].trim().toLowerCase().includes("class")) {
+      const _classes = cc[i].slice(2);
+      const _ccs = cc[i + 1].slice(2);
+
+      for (let j = 0; j < _classes.length; j++) {
+        const class_ = _classes[j];
+        const ccEmail = _ccs[j];
+
+        if (!class_ || class_ === "") continue;
+        if (!ccEmail || ccEmail === "") continue;
+
+        assert(
+          classes.find((c) => c.class === class_),
+          `ERROR 404: Class ${class_} not found.`
+        );
+
+        newCCs.push({
+          class: class_,
+          cc: ccEmail,
+        });
+      }
+
+      i++;
+    }
+  }
+
+  await Classes.bulkWrite(
+    newCCs.map((c) => ({
+      updateOne: {
+        filter: { class: c.class },
+        update: { coordinator: c.cc },
+      },
+    }))
+  );
+};
+
+const uploadMentorsData = async (mentors) => {
+  mentors = trimNestedArray(mentors);
+
+  const batches = await Batch.find();
+  const newMentors = [];
+
+  for (let i = 0; i < mentors.length; i++) {
+    if (mentors[i][2].trim().toLowerCase().includes("batch")) {
+      const _batches = mentors[i].slice(3);
+      const _mentors = mentors[i + 1].slice(3);
+
+      for (let j = 0; j < _batches.length; j++) {
+        const batch = _batches[j];
+        const mentorEmail = _mentors[j];
+
+        if (!batch || batch === "") continue;
+        if (!mentorEmail || mentorEmail === "") continue;
+
+        assert(
+          batches.find((b) => b.batch === batch),
+          `ERROR 404: Batch ${batch} not found.`
+        );
+
+        newMentors.push({
+          batch,
+          mentor: mentorEmail,
+        });
+      }
+
+      i++;
+    }
+  }
+
+  await Batch.bulkWrite(
+    newMentors.map((m) => ({
+      updateOne: {
+        filter: { batch: m.batch },
+        update: { mentor: m.mentor },
+      },
+    }))
+  );
+};
+
+const uploadTESeminarsData = async (teSeminars) => {
+  teSeminars = trimNestedArray(teSeminars);
+
+  const studentRecords = await StudentRecord.find().select("-_id -__v");
+  const newTeSeminars = [];
+
+  for (let i = 0; i < teSeminars.length; i++) {
+    const teacherEmail = teSeminars[i][0];
+    const rollNos = teSeminars[i].slice(1);
+
+    for (let j = 0; j < rollNos.length; j++) {
+      const rollNo = rollNos[j];
+
+      if (rollNo === "") continue;
+      assert(
+        studentRecords.find((s) => s.rollNo === rollNo),
+        `ERROR 404: Roll No ${rollNo} not found.`
+      );
+
+      // Check if rollNo is of 3rd year.
+      assert(
+        checkStudentsWithYear(rollNo, 3),
+        `ERROR 403: Roll No ${rollNo} is not of 3rd year.`
+      );
+
+      newTeSeminars.push({
+        rollNo,
+        teacherEmail,
+      });
+    }
+  }
+
+  await StudentRecord.bulkWrite(
+    newTeSeminars.map((s) => ({
+      updateOne: {
+        filter: { rollNo: s.rollNo },
+        update: { $set: { "extra.te_seminar": s.teacherEmail } },
+      },
+    }))
+  );
+};
+
+const uploadBEProjectsData = async (beProjects) => {
+  beProjects = trimNestedArray(beProjects);
+
+  const studentRecords = await StudentRecord.find().select("-_id -__v");
+  const newBEProjects = [];
+
+  for (let i = 0; i < beProjects.length; i++) {
+    const teacherEmail = beProjects[i][0];
+    const rollNos = beProjects[i].slice(1);
+
+    for (let j = 0; j < rollNos.length; j++) {
+      const rollNo = rollNos[j];
+
+      if (rollNo === "") continue;
+      assert(
+        studentRecords.find((s) => s.rollNo === rollNo),
+        `ERROR 404: Roll No ${rollNo} not found.`
+      );
+
+      // Check if rollNo is of 4th year.
+      assert(
+        checkStudentsWithYear(rollNo, 4),
+        `ERROR 403: Roll No ${rollNo} is not of 4th year.`
+      );
+
+      newBEProjects.push({
+        rollNo,
+        teacherEmail,
+      });
+    }
+  }
+
+  await StudentRecord.bulkWrite(
+    newBEProjects.map((s) => ({
+      updateOne: {
+        filter: { rollNo: s.rollNo },
+        update: { $set: { "extra.be_project": s.teacherEmail } },
+      },
+    }))
+  );
+};
+
+const uploadHonorsData = async (honors) => {
+  honors = trimNestedArray(honors);
+
+  const studentRecords = await StudentRecord.find().select("-_id -__v");
+  const newHonors = [];
+
+  for (let i = 0; i < honors.length; i++) {
+    const teacherEmail = honors[i][0];
+    const rollNos = honors[i].slice(1);
+
+    for (let j = 0; j < rollNos.length; j++) {
+      const rollNo = rollNos[j];
+
+      if (rollNo === "") continue;
+      assert(
+        studentRecords.find((s) => s.rollNo === rollNo),
+        `ERROR 404: Roll No ${rollNo} not found.`
+      );
+
+      newHonors.push({
+        rollNo,
+        teacherEmail,
+      });
+    }
+  }
+
+  await StudentRecord.bulkWrite(
+    newHonors.map((s) => ({
+      updateOne: {
+        filter: { rollNo: s.rollNo },
+        update: { $set: { "extra.honor": s.teacherEmail } },
+      },
+    }))
+  );
+};
+
 module.exports = {
   uploadClassesData,
   uploadStudentsData,
@@ -427,4 +662,9 @@ module.exports = {
   uploadAttendanceData,
   uploadAssignmentsData,
   uploadUTMarksData,
+  uploadCCData,
+  uploadMentorsData,
+  uploadTESeminarsData,
+  uploadBEProjectsData,
+  uploadHonorsData,
 };

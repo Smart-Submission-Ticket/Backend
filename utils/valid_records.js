@@ -16,7 +16,16 @@ const isValidUTMarks = (marks) => {
   return marks >= VALID_UT_MARKS;
 };
 
+const checkStudentsWithYear = (rollNos, year) => {
+  if (!Array.isArray(rollNos)) rollNos = [rollNos];
+  rollNos = rollNos.map((rollNo) => rollNo.toString());
+  return rollNos.every((rollNo) =>
+    rollNo.toString().startsWith(year.toString())
+  );
+};
+
 module.exports = {
   isValidAttendance,
   isValidUTMarks,
+  checkStudentsWithYear,
 };
