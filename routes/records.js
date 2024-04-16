@@ -55,7 +55,16 @@ router.get("/", auth, async (req, res) => {
   }
 
   res.send({
-    ..._.pick(student, ["rollNo", "name", "email", "batch", "class", "year"]),
+    ..._.pick(student, [
+      "rollNo",
+      "name",
+      "email",
+      "batch",
+      "class",
+      "year",
+      "mobile",
+      "abcId",
+    ]),
     class_coordinator: classes.find(
       (c) => c.class === batch.class && c.year === batch.year
     ).coordinator,
