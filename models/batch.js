@@ -54,6 +54,9 @@ const batchSchema = new mongoose.Schema({
       },
     },
   ],
+  mentor: {
+    type: String,
+  },
 });
 
 const Batch = mongoose.model("Batch", batchSchema);

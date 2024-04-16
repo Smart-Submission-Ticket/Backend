@@ -275,68 +275,88 @@
 
    - Will fetch all the attendance from google sheets.
 
-5. `POST /submit/classes`
+5. `POST /fetch/class_coordinators`
 
-   - Will fetch all the classes and batches from excel file.
+   - Will fetch all the class coordinators from google sheets.
 
-   - Request (multipart/form-data):
+6. `POST /fetch/mentors`
 
-     ```json
-     {
-       "file": "classes.xlsx"
-     }
-     ```
+   - Will fetch all the mentors from google sheets.
 
-6. `POST /submit/students`
+7. `POST /fetch/te_seminars`
 
-   - Will fetch all the students from excel file.
+   - Will fetch all the TE seminars from google sheets.
 
-   - Request (multipart/form-data):
+8. `POST /fetch/be_projects`
 
-     ```json
-     {
-       "file": "students.xlsx"
-     }
-     ```
+   - Will fetch all the BE projects from google sheets.
 
-7. `POST /submit/curriculum`
+9. `POST /fetch/honors`
 
-   - Will fetch all the curriculum from excel file.
+   - Will fetch all the honors from google sheets.
 
-   - Request (multipart/form-data):
+10. `POST /submit/classes`
 
-     ```json
-     {
-       "file": "curriculum.xlsx"
-     }
-     ```
+    - Will fetch all the classes and batches from excel file.
 
-8. `POST /submit/attendance`
+    - Request (multipart/form-data):
 
-   - Will fetch all the attendance from excel file.
+      ```json
+      {
+        "file": "classes.xlsx"
+      }
+      ```
 
-   - Request (multipart/form-data):
+11. `POST /submit/students`
 
-     ```json
-     {
-       "file": "attendance.xlsx"
-     }
-     ```
+    - Will fetch all the students from excel file.
 
-9. `POST /submit/assignments`
+    - Request (multipart/form-data):
 
-   - Will fetch all the assignments from excel file.
+      ```json
+      {
+        "file": "students.xlsx"
+      }
+      ```
 
-   - Request (multipart/form-data):
+12. `POST /submit/curriculum`
 
-     ```json
-     {
-       "subject": "OOP",
-       "file": "assignments.xlsx"
-     }
-     ```
+    - Will fetch all the curriculum from excel file.
 
-10. `POST /submit/utmarks`
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "file": "curriculum.xlsx"
+      }
+      ```
+
+13. `POST /submit/attendance`
+
+    - Will fetch all the attendance from excel file.
+
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "file": "attendance.xlsx"
+      }
+      ```
+
+14. `POST /submit/assignments`
+
+    - Will fetch all the assignments from excel file.
+
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "subject": "OOP",
+        "file": "assignments.xlsx"
+      }
+      ```
+
+15. `POST /submit/utmarks`
 
     - Will fetch all the unit test marks from excel file.
 

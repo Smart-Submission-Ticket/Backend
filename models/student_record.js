@@ -33,6 +33,10 @@ const studentRecordSchema = new mongoose.Schema({
     type: Map,
     of: [Number],
   },
+  extra: {
+    type: Map,
+    of: String,
+  },
 });
 
 const StudentRecord = mongoose.model("StudentRecord", studentRecordSchema);
