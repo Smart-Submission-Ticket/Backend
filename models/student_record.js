@@ -15,6 +15,7 @@ const studentRecordSchema = new mongoose.Schema({
   unitTests: {
     type: Map,
     of: {
+      _id: false,
       ut1: {
         type: Number,
       },
@@ -31,7 +32,15 @@ const studentRecordSchema = new mongoose.Schema({
   },
   assignments: {
     type: Map,
-    of: [Number],
+    of: {
+      _id: false,
+      marks: {
+        type: [Number],
+      },
+      allCompleted: {
+        type: Boolean,
+      },
+    },
   },
   extra: {
     type: Map,
