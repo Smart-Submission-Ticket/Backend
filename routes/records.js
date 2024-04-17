@@ -22,38 +22,6 @@ router.get("/", auth, async (req, res) => {
   assert(record, "ERROR 404: Record not found");
   assert(batch, "ERROR 404: Batch not found");
 
-  const assignments = {};
-  if (record.assignments && typeof record.assignments === "object") {
-    for (const [key, value] of record.assignments) {
-      assignments[key] = {
-        marks: value,
-        allCompleted:
-          value.length ===
-          batch.practical.find((practical) => practical.title === key)
-            .noOfAssignments,
-      };
-    }
-  }
-
-  const unitTests = {};
-  if (record.unitTests && typeof record.unitTests === "object") {
-    for (const [key, value] of record.unitTests) {
-      unitTests[key] = _.pick(value, [
-        "ut1",
-        "ut2",
-        "ut1Alternate",
-        "ut2Alternate",
-      ]);
-    }
-  }
-
-  const extra = {};
-  if (record.extra && typeof record.extra === "object") {
-    for (const [key, value] of record.extra) {
-      extra[key] = value;
-    }
-  }
-
   res.send({
     ..._.pick(student, [
       "rollNo",
@@ -85,9 +53,9 @@ router.get("/", auth, async (req, res) => {
       }),
     },
     ..._.pick(record, ["attendance", "attendanceAlternate"]),
-    assignments,
-    unitTests,
-    ...extra,
+    assignments: record.assignments,
+    unitTests: record.unitTests,
+    ...Object.fromEntries(record.extra || new Map()),
   });
 });
 
@@ -103,38 +71,6 @@ router.get("/rollNo/:rollNo", teacher, async (req, res) => {
   ]);
   assert(record, "ERROR 404: Record not found");
   assert(batch, "ERROR 404: Batch not found");
-
-  const assignments = {};
-  if (record.assignments && typeof record.assignments === "object") {
-    for (const [key, value] of record.assignments) {
-      assignments[key] = {
-        marks: value,
-        allCompleted:
-          value.length ===
-          batch.practical.find((practical) => practical.title === key)
-            .noOfAssignments,
-      };
-    }
-  }
-
-  const unitTests = {};
-  if (record.unitTests && typeof record.unitTests === "object") {
-    for (const [key, value] of record.unitTests) {
-      unitTests[key] = _.pick(value, [
-        "ut1",
-        "ut2",
-        "ut1Alternate",
-        "ut2Alternate",
-      ]);
-    }
-  }
-
-  const extra = {};
-  if (record.extra && typeof record.extra === "object") {
-    for (const [key, value] of record.extra) {
-      extra[key] = value;
-    }
-  }
 
   res.send({
     ..._.pick(student, ["rollNo", "name", "email", "batch", "class", "year"]),
@@ -158,9 +94,9 @@ router.get("/rollNo/:rollNo", teacher, async (req, res) => {
       }),
     },
     ..._.pick(record, ["attendance", "attendanceAlternate"]),
-    assignments,
-    unitTests,
-    ...extra,
+    assignments: record.assignments,
+    unitTests: record.unitTests,
+    ...Object.fromEntries(record.extra || new Map()),
   });
 });
 
@@ -218,41 +154,12 @@ router.get("/batch/:batch", teacher, async (req, res) => {
   students.forEach((student) => {
     const record = records.find((record) => record.rollNo === student.rollNo);
 
-    const assignments = {};
-    if (record.assignments && typeof record.assignments === "object") {
-      for (const [key, value] of record.assignments) {
-        assignments[key] = {
-          marks: value,
-          allCompleted: value.length === noOfAssignments[key],
-        };
-      }
-    }
-
-    const unitTests = {};
-    if (record.unitTests && typeof record.unitTests === "object") {
-      for (const [key, value] of record.unitTests) {
-        unitTests[key] = _.pick(value, [
-          "ut1",
-          "ut2",
-          "ut1Alternate",
-          "ut2Alternate",
-        ]);
-      }
-    }
-
-    const extra = {};
-    if (record.extra && typeof record.extra === "object") {
-      for (const [key, value] of record.extra) {
-        extra[key] = value;
-      }
-    }
-
     student_records[student.rollNo] = {
       ..._.pick(student, ["email", "name", "batch"]),
       ..._.pick(record, ["attendance", "attendanceAlternate"]),
-      assignments,
-      unitTests,
-      ...extra,
+      assignments: record.assignments,
+      unitTests: record.unitTests,
+      ...Object.fromEntries(record.extra || new Map()),
     };
   });
 
@@ -322,41 +229,12 @@ router.get("/class/:class", teacher, async (req, res) => {
   students.forEach((student) => {
     const record = records.find((record) => record.rollNo === student.rollNo);
 
-    const assignments = {};
-    if (record.assignments && typeof record.assignments === "object") {
-      for (const [key, value] of record.assignments) {
-        assignments[key] = {
-          marks: value,
-          allCompleted: value.length === noOfAssignments[key],
-        };
-      }
-    }
-
-    const unitTests = {};
-    if (record.unitTests && typeof record.unitTests === "object") {
-      for (const [key, value] of record.unitTests) {
-        unitTests[key] = _.pick(value, [
-          "ut1",
-          "ut2",
-          "ut1Alternate",
-          "ut2Alternate",
-        ]);
-      }
-    }
-
-    const extra = {};
-    if (record.extra && typeof record.extra === "object") {
-      for (const [key, value] of record.extra) {
-        extra[key] = value;
-      }
-    }
-
     student_records[student.rollNo] = {
       ..._.pick(student, ["email", "name", "batch"]),
       ..._.pick(record, ["attendance", "attendanceAlternate"]),
-      assignments,
-      unitTests,
-      ...extra,
+      assignments: record.assignments,
+      unitTests: record.unitTests,
+      ...Object.fromEntries(record.extra || new Map()),
     };
   });
 
@@ -431,30 +309,25 @@ router.get("/batch/:batch/subject/:subject", teacher, async (req, res) => {
   students.forEach((student) => {
     const record = records.find((record) => record.rollNo === student.rollNo);
 
-    const assignments = {};
-    if (subjectExistsInAssignments && record.assignments.get(subject)) {
-      assignments[subject] = {
-        marks: record.assignments.get(subject),
-        allCompleted:
-          record.assignments.get(subject).length === noOfAssignments[subject],
-      };
-    }
-
-    const unitTests = {};
-    if (subjectExistsInTheory && record.unitTests.get(subject)) {
-      unitTests[subject] = _.pick(record.unitTests.get(subject), [
-        "ut1",
-        "ut2",
-        "ut1Alternate",
-        "ut2Alternate",
-      ]);
-    }
-
     student_records[student.rollNo] = {
       ..._.pick(student, ["email", "name", "batch"]),
       ..._.pick(record, ["attendance", "attendanceAlternate"]),
-      ...(subjectExistsInAssignments ? { assignments } : {}),
-      ...(subjectExistsInTheory ? { unitTests } : {}),
+      ...(subjectExistsInAssignments
+        ? {
+            assignments:
+              record.assignments && record.assignments.get(subject)
+                ? record.assignments.get(subject)
+                : {},
+          }
+        : {}),
+      ...(subjectExistsInTheory
+        ? {
+            unitTests:
+              record.unitTests && record.unitTests.get(subject)
+                ? record.unitTests.get(subject)
+                : {},
+          }
+        : {}),
     };
   });
 
@@ -533,38 +406,25 @@ router.get("/class/:class/subject/:subject", teacher, async (req, res) => {
   students.forEach((student) => {
     const record = records.find((record) => record.rollNo === student.rollNo);
 
-    const assignments = {};
-    if (
-      subjectExistsInAssignments &&
-      record.assignments &&
-      record.assignments.get(subject)
-    ) {
-      assignments[subject] = {
-        marks: record.assignments.get(subject),
-        allCompleted:
-          record.assignments.get(subject).length === noOfAssignments[subject],
-      };
-    }
-
-    const unitTests = {};
-    if (
-      subjectExistsInTheory &&
-      record.unitTests &&
-      record.unitTests.get(subject)
-    ) {
-      unitTests[subject] = _.pick(record.unitTests.get(subject), [
-        "ut1",
-        "ut2",
-        "ut1Alternate",
-        "ut2Alternate",
-      ]);
-    }
-
     student_records[student.rollNo] = {
       ..._.pick(student, ["email", "name", "batch"]),
       ..._.pick(record, ["attendance", "attendanceAlternate"]),
-      ...(subjectExistsInAssignments ? { assignments } : {}),
-      ...(subjectExistsInTheory ? { unitTests } : {}),
+      ...(subjectExistsInAssignments
+        ? {
+            assignments:
+              record.assignments && record.assignments.get(subject)
+                ? record.assignments.get(subject)
+                : {},
+          }
+        : {}),
+      ...(subjectExistsInTheory
+        ? {
+            unitTests:
+              record.unitTests && record.unitTests.get(subject)
+                ? record.unitTests.get(subject)
+                : {},
+          }
+        : {}),
     };
   });
 

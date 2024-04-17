@@ -57,6 +57,7 @@ const uploadStudentsData = async (students) => {
   students = trimNestedArray(students);
 
   const classes = await Classes.find();
+  const batchDocs = await Batch.find();
   const newStudents = [];
 
   let batch = "";
@@ -78,6 +79,11 @@ const uploadStudentsData = async (students) => {
         year: classes.find((c) => c.batches.includes(batch)).year,
       });
     }
+
+    const batchDoc = batchDocs.find((b) => b.batch === batch);
+    if (batchDoc) {
+      batchDoc.rollNos = rollNos;
+    }
   };
 
   for (let i = 0; i < students.length; i++) {
@@ -95,19 +101,31 @@ const uploadStudentsData = async (students) => {
 
   addStudents(batch, rollNos, emails);
 
-  await StudentData.bulkWrite(
-    newStudents.map((s) => ({
-      updateOne: {
-        filter: { email: s.email },
-        update: s,
-        upsert: true,
-      },
-    }))
-  );
+  await Promise.all([
+    StudentData.bulkWrite(
+      newStudents.map((s) => ({
+        updateOne: {
+          filter: { email: s.email },
+          update: s,
+          upsert: true,
+        },
+      }))
+    ),
+    Batch.bulkWrite(
+      batchDocs.map((b) => ({
+        updateOne: {
+          filter: { batch: b.batch },
+          update: b,
+          upsert: true,
+        },
+      }))
+    ),
+  ]);
 };
 
 const uploadCurriculumData = async (curriculum) => {
-  curriculum = trimNestedArray(curriculum);
+  curriculum.theory = trimNestedArray(curriculum.theory);
+  curriculum.practical = trimNestedArray(curriculum.practical);
 
   const [classes, studentDatas, batchDocs, teachers] = await Promise.all([
     Classes.find(),
@@ -306,6 +324,36 @@ const uploadAssignmentsData = async (subject, assignments) => {
     .find((a) => a[0].trim().toLowerCase().includes("roll"))
     .slice(1);
 
+  const [studentRecords, studentDatas] = await Promise.all([
+    StudentRecord.find().select("-_id -__v"),
+    StudentData.find({ rollNo: { $in: rollNos } }),
+  ]);
+
+  assert(
+    studentDatas.length === rollNos.length,
+    "ERROR 404: Some roll nos not found."
+  );
+
+  const batches = studentDatas.map((s) => s.batch);
+  const batchDocs = await Batch.find({ batch: { $in: batches } });
+
+  for (let i = 0; i < batchDocs.length; i++) {
+    assert(
+      batchDocs[i].practical.find(
+        (p) => p.title.toLowerCase() === subject.toLowerCase()
+      ),
+      `ERROR 404: Subject ${subject} not found in batch ${batchDocs[i].batch}.`
+    );
+  }
+
+  const subjectTitle = batchDocs[0].practical.find(
+    (p) => p.title.toLowerCase() === subject.toLowerCase()
+  ).title;
+
+  const noOfAssignments = batchDocs[0].practical.find(
+    (p) => p.title.toLowerCase() === subject.toLowerCase()
+  ).noOfAssignments;
+
   const newAssignments = [];
 
   for (let i = 0; i < rollNos.length; i++) {
@@ -323,10 +371,12 @@ const uploadAssignmentsData = async (subject, assignments) => {
     newAssignments.push({
       rollNo,
       subjectAssignments,
+      allCompleted:
+        subjectAssignments.length === noOfAssignments &&
+        !(subjectAssignments.includes(0) || subjectAssignments.includes("0")),
     });
   }
 
-  const studentRecords = await StudentRecord.find().select("-_id -__v");
   const newStudentRecords = [];
   const brandNewStudentRecords = [];
 
@@ -337,14 +387,28 @@ const uploadAssignmentsData = async (subject, assignments) => {
 
     if (studentRecord) {
       const newAssignmentsMap = new Map(studentRecord.assignments);
-      newAssignmentsMap.set(subject, newAssignments[i].subjectAssignments);
+
+      const newAssignment = {
+        marks: newAssignments[i].subjectAssignments,
+        allCompleted: newAssignments[i].allCompleted,
+      };
+
+      newAssignmentsMap.set(subjectTitle, newAssignment);
       studentRecord.assignments = newAssignmentsMap;
 
       newStudentRecords.push(studentRecord);
     } else {
       brandNewStudentRecords.push({
         rollNo: newAssignments[i].rollNo,
-        assignments: new Map([[subject, newAssignments[i].subjectAssignments]]),
+        assignments: new Map([
+          [
+            subjectTitle,
+            {
+              marks: newAssignments[i].subjectAssignments,
+              allCompleted: newAssignments[i].allCompleted,
+            },
+          ],
+        ]),
       });
     }
   }

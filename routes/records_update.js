@@ -11,9 +11,6 @@ const {
 const router = express.Router();
 
 router.post("/attendance", async (req, res) => {
-  let { attendance } = req.body;
-  assert(attendance, "ERROR 400: attendance is required");
-
   /*
   Valid attendance:
   1. attendance: { rollNo: "123", attendance: 90 }
@@ -21,10 +18,11 @@ router.post("/attendance", async (req, res) => {
   3. attendance: [{ rollNo: "123", attendance: 90 }, { rollNo: "456", attendanceAlternate: true }]
   */
 
+  let { attendance } = req.body;
+  assert(attendance, "ERROR 400: attendance is required");
+
   // Convert to array if not already
-  if (!Array.isArray(attendance)) {
-    attendance = [attendance];
-  }
+  if (!Array.isArray(attendance)) attendance = [attendance];
 
   // Check if all attendance values are valid
   attendance.forEach((a) => {
@@ -96,12 +94,6 @@ router.post("/attendance", async (req, res) => {
 });
 
 router.post("/utmarks/:subject", async (req, res) => {
-  let { subject } = req.params;
-  assert(subject, "ERROR 400: subject is required");
-
-  let { utmarks } = req.body;
-  assert(utmarks, "ERROR 400: utmarks is required");
-
   /*
   Valid utmarks:
   1. utmarks: { rollNo: "123", ut1: 23, ut2: 20, ut1Alternate: true, ut2Alternate: true }
@@ -112,10 +104,14 @@ router.post("/utmarks/:subject", async (req, res) => {
   ]
   */
 
+  let { subject } = req.params;
+  assert(subject, "ERROR 400: subject is required");
+
+  let { utmarks } = req.body;
+  assert(utmarks, "ERROR 400: utmarks is required");
+
   // Convert to array if not already
-  if (!Array.isArray(utmarks)) {
-    utmarks = [utmarks];
-  }
+  if (!Array.isArray(utmarks)) utmarks = [utmarks];
 
   // Check if all utmarks values are valid
   utmarks.forEach((u) => {
@@ -211,6 +207,69 @@ router.post("/utmarks/:subject", async (req, res) => {
   );
 
   res.send({ message: "UT marks updated.", utmarks });
+});
+
+router.post("/assignments/:subject", async (req, res) => {
+  /*
+  Valid assignments:
+  1. assignments: { rollNo: "123", allCompleted: true }
+  2. utmarks: [
+    { rollNo: "123", allCompleted: true },
+    { rollNo: "456", allCompleted: true }
+  ]
+  */
+
+  let { subject } = req.params;
+  assert(subject, "ERROR 400: subject is required");
+
+  let { assignments } = req.body;
+  assert(assignments, "ERROR 400: assignments is required");
+
+  // Convert to array if not already
+  if (!Array.isArray(assignments)) assignments = [assignments];
+
+  // Check if all assignments values are valid
+  assignments.forEach((a) => {
+    assert(a.rollNo, "ERROR 400: rollNo is required");
+    assert(a.allCompleted !== undefined, "ERROR 400: allCompleted is required");
+    assert(
+      typeof a.allCompleted === "boolean",
+      "ERROR 400: allCompleted must be a boolean"
+    );
+  });
+
+  // Check if all roll numbers are valid
+  const rollNos = assignments.map((a) => a.rollNo);
+  const students = await StudentRecord.find({ rollNo: { $in: rollNos } });
+  const studentRollNos = students.map((s) => s.rollNo);
+  const invalidRollNos = rollNos.filter((r) => !studentRollNos.includes(r));
+  assert(
+    invalidRollNos.length === 0,
+    `ERROR 400: Invalid roll numbers: ${invalidRollNos.join(", ")}`
+  );
+
+  // Check if subject is valid
+  const validSubjects = new Set(students[0].assignments.keys());
+
+  assert(
+    validSubjects.has(subject),
+    `ERROR 400: Invalid subject. Valid subjects: ${[...validSubjects].join(
+      ", "
+    )}`
+  );
+
+  await StudentRecord.bulkWrite(
+    assignments.map((a) => ({
+      updateOne: {
+        filter: { rollNo: a.rollNo },
+        update: {
+          [`assignments.${subject}.allCompleted`]: a.allCompleted,
+        },
+      },
+    }))
+  );
+
+  res.send({ message: "Assignments updated.", assignments });
 });
 
 module.exports = router;
