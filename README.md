@@ -560,3 +560,34 @@
      ]
    }
    ```
+
+3. `POST /records/update/assignments/:subject`
+
+   - Will update assignments for individual student.
+
+   - Request headers:
+
+     - `x-auth-token`: "jwt-token for teacher authentication"
+
+   - Request Body:
+
+   ```json
+   {
+     "assignments": [
+       { "rollNo": "123", "allCompleted": true },
+       { "rollNo": "456", "allCompleted": false }
+     ]
+   }
+   ```
+
+   - Response:
+
+   ```json
+   {
+     "message": "Assignments updated.",
+     "assignments": [
+       { "rollNo": "123", "allCompleted": true },
+       { "rollNo": "456", "allCompleted": false }
+     ]
+   }
+   ```
