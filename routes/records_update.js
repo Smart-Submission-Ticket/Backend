@@ -213,7 +213,7 @@ router.post("/assignments/:subject", async (req, res) => {
   /*
   Valid assignments:
   1. assignments: { rollNo: "123", allCompleted: true }
-  2. utmarks: [
+  2. assignments: [
     { rollNo: "123", allCompleted: true },
     { rollNo: "456", allCompleted: true }
   ]
