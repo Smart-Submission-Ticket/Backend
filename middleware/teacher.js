@@ -5,8 +5,6 @@ const { JWT_PRIVATE_KEY, NODE_ENV } = require("../config");
 const { Teacher } = require("../models/teacher");
 
 module.exports = async function (req, res, next) {
-  if (NODE_ENV === "development") return next();
-
   const token = req.header("x-auth-token");
   assert(token, "ERROR 401: Access denied. No token provided.");
 

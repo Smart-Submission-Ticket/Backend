@@ -2,7 +2,7 @@ const express = require("express");
 const assert = require("assert");
 
 const { isValidAttendance, isValidUTMarks } = require("../utils/valid_records");
-
+const admin = require("../middleware/admin");
 const { StudentRecord } = require("../models/student_record");
 const {
   updateAttendanceSpreadSheetValues,
@@ -10,7 +10,7 @@ const {
 
 const router = express.Router();
 
-router.post("/attendance", async (req, res) => {
+router.post("/attendance", admin, async (req, res) => {
   /*
   Valid attendance:
   1. attendance: { rollNo: "123", attendance: 90 }
@@ -158,6 +158,8 @@ router.post("/utmarks/:subject", async (req, res) => {
     )}`
   );
 
+  // TODO: Check if teacher is allowed to upload UT marks for the subject for the roll numbers
+
   // Fill all missing values with values from the database
   utmarks = utmarks.map((u) => {
     const student = students.find((s) => s.rollNo === u.rollNo);
@@ -257,6 +259,8 @@ router.post("/assignments/:subject", async (req, res) => {
       ", "
     )}`
   );
+
+  // TODO: Check if teacher is allowed to upload assignments for the subject for the roll numbers
 
   await StudentRecord.bulkWrite(
     assignments.map((a) => ({
