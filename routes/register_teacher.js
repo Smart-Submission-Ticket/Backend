@@ -24,7 +24,7 @@ const checkIfTeacherAllowed = async (req, res, next) => {
 
 router.post("/verify-email", checkIfTeacherAllowed, async (req, res) => {
   const { email } = req.body;
-  const teacher = await Teacher.findOne({ email: email });
+  const teacher = await Teacher.findOne({ email: email, isRegistered: true });
   assert(!teacher, "ERROR 400: Teacher already registered.");
 
   const otp = generateOtp();

@@ -1,6 +1,7 @@
 const express = require("express");
 const assert = require("assert");
 
+const { TicketData } = require("../models/ticket_data");
 const admin = require("../middleware/admin");
 const upload = require("../middleware/files");
 const readExcel = require("../utils/read_excel");
@@ -14,6 +15,12 @@ const {
 } = require("../utils/upload_data");
 
 const router = express.Router();
+
+router.post("/ticket", admin, async (req, res) => {
+  const ticketData = req.body;
+  await TicketData.updateTicketData(ticketData);
+  res.send({ message: "Ticket submission details updated." });
+});
 
 router.post("/classes", admin, upload.single("file"), async (req, res) => {
   const classes = readExcel(req.file.buffer);

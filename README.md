@@ -369,6 +369,28 @@
       }
       ```
 
+16. `POST /submit/ticket`
+
+    - WIll update ticket submission details.
+
+    - Request Body:
+
+    ```json
+    {
+      "academicYear": "2023 - 2024",
+      "attendanceLabAsst": "Mrs S. L. Rane",
+      "studentAcheivementCommittee": "Sheetal Patil Madam"
+    }
+    ```
+
+    - Response:
+
+    ```json
+    {
+      "message": "Ticket submission details updated."
+    }
+    ```
+
 ### Classes and Batches
 
 1.  `GET /classes`
@@ -470,6 +492,20 @@
 
     - Request headers:
       - `x-auth-token`: "jwt-token for teacher authentication"
+
+7.  `GET /records/ticket`
+
+    - Will fetch all the records related to ticket submission.
+
+    - Response:
+
+    ```json
+    {
+      "academicYear": "2023 - 2024",
+      "attendanceLabAsst": "Mrs S. L. Rane",
+      "studentAcheivementCommittee": "Sheetal Patil Madam"
+    }
+    ```
 
 ### Update Records
 

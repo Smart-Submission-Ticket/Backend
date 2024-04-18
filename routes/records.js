@@ -2,6 +2,7 @@ const express = require("express");
 const assert = require("assert");
 const _ = require("lodash");
 
+const { TicketData } = require("../models/ticket_data");
 const { StudentRecord } = require("../models/student_record");
 const { Batch } = require("../models/batch");
 const { Classes } = require("../models/classes");
@@ -10,6 +11,11 @@ const auth = require("../middleware/auth");
 const teacher = require("../middleware/teacher");
 
 const router = express.Router();
+
+router.get("/ticket", async (req, res) => {
+  const ticketData = await TicketData.getTicketData();
+  res.send(ticketData || {});
+});
 
 router.get("/", auth, async (req, res) => {
   const [student, record, batch, classes] = await Promise.all([
