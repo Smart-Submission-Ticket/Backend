@@ -11,6 +11,7 @@ const records = require("../routes/records");
 const recordsUpdate = require("../routes/records_update");
 
 const teacher = require("../middleware/teacher");
+const admin = require("../middleware/admin");
 const error = require("../middleware/error");
 
 module.exports = function (app) {
@@ -19,7 +20,7 @@ module.exports = function (app) {
   app.use("/register/student", registerStudent);
   app.use("/register/teacher", registerTeacher);
   app.use("/login", login);
-  app.use("/fetch", teacher, fetch);
+  app.use("/fetch", teacher, admin, fetch);
   app.use("/submit", teacher, submit);
   app.use("/classes", teacher, classes);
   app.use("/records", records);

@@ -1,6 +1,7 @@
 const express = require("express");
 const assert = require("assert");
 
+const admin = require("../middleware/admin");
 const upload = require("../middleware/files");
 const readExcel = require("../utils/read_excel");
 const {
@@ -14,19 +15,19 @@ const {
 
 const router = express.Router();
 
-router.post("/classes", upload.single("file"), async (req, res) => {
+router.post("/classes", admin, upload.single("file"), async (req, res) => {
   const classes = readExcel(req.file.buffer);
   await uploadClassesData(classes);
   res.send({ message: "Classes updated." });
 });
 
-router.post("/students", upload.single("file"), async (req, res) => {
+router.post("/students", admin, upload.single("file"), async (req, res) => {
   const students = readExcel(req.file.buffer);
   await uploadStudentsData(students);
   res.send({ message: "Allowed students updated." });
 });
 
-router.post("/curriculum", upload.single("file"), async (req, res) => {
+router.post("/curriculum", admin, upload.single("file"), async (req, res) => {
   const theory = readExcel(req.file.buffer, "Theory");
   const practical = readExcel(req.file.buffer, "Practical");
   const curriculum = { theory, practical };
@@ -34,7 +35,7 @@ router.post("/curriculum", upload.single("file"), async (req, res) => {
   res.send({ message: "Curriculum updated." });
 });
 
-router.post("/attendance", upload.single("file"), async (req, res) => {
+router.post("/attendance", admin, upload.single("file"), async (req, res) => {
   const attendance = readExcel(req.file.buffer);
   await uploadAttendanceData(attendance);
   res.send({ message: "Attendance updated." });
