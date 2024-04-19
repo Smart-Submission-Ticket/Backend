@@ -18,6 +18,13 @@ const classesSchema = new mongoose.Schema({
   },
 });
 
+classesSchema.statics.getCoordinatingClasses = async function (teacher) {
+  const classes = await this.find({ coordinator: teacher }).select(
+    "-_id -__v -coordinator -batches"
+  );
+  return classes;
+};
+
 const Classes = mongoose.model("Classes", classesSchema);
 
 module.exports.Classes = Classes;

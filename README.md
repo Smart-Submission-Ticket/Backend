@@ -449,6 +449,55 @@
     }
     ```
 
+3.  `GET /classes/assigned`
+
+    - Will fetch all the batches, classes, mentors, class coordinators assigned to a teacher.
+
+    - Request headers:
+
+      - `x-auth-token`: "jwt-token for teacher authentication"
+
+    - Response:
+
+      ```json
+      {
+        "practicalBatches": [
+          {
+            "year": 3,
+            "class": "TE09",
+            "batch": "K9",
+            "practical": "CCL"
+          },
+          {
+            "year": 3,
+            "class": "TE09",
+            "batch": "L9",
+            "practical": "CCL"
+          }
+        ],
+        "theoryClasses": [
+          {
+            "year": 3,
+            "class": "TE09",
+            "theory": "CC"
+          }
+        ],
+        "mentoringBatches": [
+          {
+            "year": 3,
+            "class": "TE10",
+            "batch": "N10"
+          }
+        ],
+        "coordinatingClasses": [
+          {
+            "year": 3,
+            "class": "TE09"
+          }
+        ]
+      }
+      ```
+
 ### Records
 
 1.  `GET /records`
