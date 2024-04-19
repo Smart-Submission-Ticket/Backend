@@ -22,7 +22,7 @@ module.exports = function (app) {
   app.use("/login", login);
   app.use("/fetch", teacher, admin, fetch);
   app.use("/submit", teacher, submit);
-  app.use("/classes", teacher, classes);
+  app.use("/classes", classes);
   app.use("/records", records);
   app.use("/records/update", teacher, recordsUpdate);
   app.use(error);

@@ -4,6 +4,7 @@ const router = express.Router();
 
 const { Classes } = require("../models/classes");
 const { Batch } = require("../models/batch");
+const teacher = require("../middleware/teacher");
 
 router.get("/", async (req, res) => {
   const classes = await Classes.find().select("-_id -__v");
@@ -56,6 +57,27 @@ router.get("/subjects", async (req, res) => {
   });
 
   res.send(response);
+});
+
+router.get("/assigned", teacher, async (req, res) => {
+  const [
+    practicalBatches,
+    theoryClasses,
+    mentoringBatches,
+    coordinatingClasses,
+  ] = await Promise.all([
+    Batch.getAssignedPracticalBatches(req.user.email),
+    Batch.getAssignedTheoryClasses(req.user.email),
+    Batch.getMentoringBatches(req.user.email),
+    Classes.getCoordinatingClasses(req.user.email),
+  ]);
+
+  res.send({
+    practicalBatches,
+    theoryClasses,
+    mentoringBatches,
+    coordinatingClasses,
+  });
 });
 
 module.exports = router;
