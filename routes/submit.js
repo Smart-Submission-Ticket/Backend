@@ -94,10 +94,8 @@ router.post("/assignments", upload.single("file"), async (req, res) => {
   const { subject } = req.body;
   assert(subject, "ERROR 400: Subject is required.");
 
-  // TODO: Check if teacher is allowed to upload assignments for the subject.
-
   const assignments = readExcel(req.file.buffer);
-  await uploadAssignmentsData(subject, assignments);
+  await uploadAssignmentsData(subject, assignments, req.user);
   res.send({ message: "Assignments updated." });
 });
 
@@ -105,10 +103,8 @@ router.post("/utmarks", upload.single("file"), async (req, res) => {
   const { subject } = req.body;
   assert(subject, "ERROR 400: Subject is required.");
 
-  // TODO: Check if teacher is allowed to upload UT marks for the subject.
-
   const utmarks = readExcel(req.file.buffer);
-  await uploadUTMarksData(subject, utmarks);
+  await uploadUTMarksData(subject, utmarks, req.user);
   res.send({ message: "UT marks updated." });
 });
 
