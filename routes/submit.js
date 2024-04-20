@@ -13,12 +13,54 @@ const {
   uploadAssignmentsData,
   uploadUTMarksData,
 } = require("../utils/upload_data");
+const { updateMinAttendanceAndUTMarks } = require("../utils/valid_records");
+const { StudentRecord } = require("../models/student_record");
 
 const router = express.Router();
 
 router.post("/ticket", admin, async (req, res) => {
-  const ticketData = req.body;
+  /*
+    Request body should be like:
+    {
+      academicYear: "2023-2024",
+      attendanceLabAsst: "Name of the faculty",
+      studentAcheivementCommittee: "Name of the faculty",
+      attedance: {
+        minAttendanceRequired: 75,
+        updateAllData: false,
+      }
+      utmarks: {
+        minUTMarksRequired: 12,
+        updateAllData: false,
+      }
+    }
+  */
+  let ticketData = req.body;
+  const { attendance, utmarks } = ticketData;
+
+  if (attendance && attendance.minAttendanceRequired) {
+    ticketData.minAttendanceRequired = attendance.minAttendanceRequired;
+  }
+
+  if (utmarks && utmarks.minUTMarksRequired) {
+    ticketData.minUTMarksRequired = utmarks.minUTMarksRequired;
+  }
+
   await TicketData.updateTicketData(ticketData);
+
+  if (ticketData.minAttendanceRequired || ticketData.minUTMarksRequired) {
+    await updateMinAttendanceAndUTMarks(true);
+  }
+
+  StudentRecord.updateStudentRecords({
+    updateAttendances: attendance ? true : false,
+    updateUTMarks: utmarks ? true : false,
+    updateAllAttendances: attendance
+      ? attendance.updateAllData ?? false
+      : false,
+    updateAllUTMarks: utmarks ? utmarks.updateAllData ?? false : false,
+  });
+
   res.send({ message: "Ticket submission details updated." });
 });
 
