@@ -4,6 +4,7 @@ const assert = require("assert");
 const { isValidAttendance, isValidUTMarks } = require("../utils/valid_records");
 const admin = require("../middleware/admin");
 const { StudentRecord } = require("../models/student_record");
+const { Batch } = require("../models/batch");
 const {
   updateAttendanceSpreadSheetValues,
 } = require("../utils/google_sheets_service");
@@ -140,7 +141,10 @@ router.post("/utmarks/:subject", async (req, res) => {
 
   // Check if all roll numbers are valid
   const rollNos = utmarks.map((u) => u.rollNo);
-  const students = await StudentRecord.find({ rollNo: { $in: rollNos } });
+  const [students, batches] = await Promise.all([
+    StudentRecord.find({ rollNo: { $in: rollNos } }),
+    Batch.find({ rollNos: { $in: rollNos } }),
+  ]);
   const studentRollNos = students.map((s) => s.rollNo);
   const invalidRollNos = rollNos.filter((r) => !studentRollNos.includes(r));
   assert(
@@ -158,7 +162,14 @@ router.post("/utmarks/:subject", async (req, res) => {
     )}`
   );
 
-  // TODO: Check if teacher is allowed to upload UT marks for the subject for the roll numbers
+  // Check if teacher is allowed to upload UT marks for the subject for the roll numbers
+  for (let batch of batches) {
+    const subjectData = batch.theory.find((s) => s.title === subject);
+    assert(
+      subjectData.teacher === req.user.email,
+      `ERROR 400: You are not allowed to upload UT marks for ${subject} for ${batch.batch} batch.`
+    );
+  }
 
   // Fill all missing values with values from the database
   utmarks = utmarks.map((u) => {
@@ -242,7 +253,10 @@ router.post("/assignments/:subject", async (req, res) => {
 
   // Check if all roll numbers are valid
   const rollNos = assignments.map((a) => a.rollNo);
-  const students = await StudentRecord.find({ rollNo: { $in: rollNos } });
+  const [students, batches] = await Promise.all([
+    StudentRecord.find({ rollNo: { $in: rollNos } }),
+    Batch.find({ rollNos: { $in: rollNos } }),
+  ]);
   const studentRollNos = students.map((s) => s.rollNo);
   const invalidRollNos = rollNos.filter((r) => !studentRollNos.includes(r));
   assert(
@@ -260,7 +274,14 @@ router.post("/assignments/:subject", async (req, res) => {
     )}`
   );
 
-  // TODO: Check if teacher is allowed to upload assignments for the subject for the roll numbers
+  // Check if teacher is allowed to upload assignments for the subject for the roll numbers
+  for (let batch of batches) {
+    const subjectData = batch.practical.find((s) => s.title === subject);
+    assert(
+      subjectData.teacher === req.user.email,
+      `ERROR 400: You are not allowed to upload assignments for ${subject} for ${batch.batch} batch.`
+    );
+  }
 
   await StudentRecord.bulkWrite(
     assignments.map((a) => ({
