@@ -379,7 +379,17 @@
     {
       "academicYear": "2023 - 2024",
       "attendanceLabAsst": "Mrs S. L. Rane",
-      "studentAcheivementCommittee": "Sheetal Patil Madam"
+      "studentAcheivementCommittee": "Sheetal Patil Madam",
+      "attendance": {
+        "minAttendanceRequired": 75,
+        // true : Fully, false : Partially
+        "updateAllData": false // If true, will update all attendance else only for students with attendanceAlternate as false
+      },
+      "utmarks": {
+        "minUTMarksRequired": 12,
+        // true : Fully, false : Partially
+        "updateAllData": false // If true, will update all UT marks else only for students with ut1Alternate and ut2Alternate as false
+      }
     }
     ```
 
@@ -552,7 +562,9 @@
     {
       "academicYear": "2023 - 2024",
       "attendanceLabAsst": "Mrs S. L. Rane",
-      "studentAcheivementCommittee": "Sheetal Patil Madam"
+      "studentAcheivementCommittee": "Sheetal Patil Madam",
+      "minUTMarksRequired": 12,
+      "minAttendanceRequired": 75
     }
     ```
 
