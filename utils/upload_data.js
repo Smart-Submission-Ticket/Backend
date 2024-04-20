@@ -316,7 +316,7 @@ const uploadAttendanceData = async (attendance) => {
   ]);
 };
 
-const uploadAssignmentsData = async (subject, assignments) => {
+const uploadAssignmentsData = async (subject, assignments, user) => {
   subject = subject.trim();
   assignments = trimNestedArray(assignments);
 
@@ -343,6 +343,13 @@ const uploadAssignmentsData = async (subject, assignments) => {
         (p) => p.title.toLowerCase() === subject.toLowerCase()
       ),
       `ERROR 404: Subject ${subject} not found in batch ${batchDocs[i].batch}.`
+    );
+
+    assert(
+      batchDocs[i].practical.find(
+        (p) => p.title.toLowerCase() === subject.toLowerCase()
+      ).teacher === user.email,
+      `ERROR 403: You are not allowed to upload assignments for ${subject} for ${batchDocs[i].batch} batch.`
     );
   }
 
@@ -427,13 +434,42 @@ const uploadAssignmentsData = async (subject, assignments) => {
   ]);
 };
 
-const uploadUTMarksData = async (subject, utMarks) => {
+const uploadUTMarksData = async (subject, utMarks, user) => {
   subject = subject.trim();
   utMarks = trimNestedArray(utMarks);
 
   const rollNos = utMarks
     .find((a) => a[0].trim().toLowerCase().includes("roll"))
     .slice(1);
+
+  const [studentRecords, studentDatas] = await Promise.all([
+    StudentRecord.find().select("-_id -__v"),
+    StudentData.find({ rollNo: { $in: rollNos } }),
+  ]);
+
+  assert(
+    studentDatas.length === rollNos.length,
+    "ERROR 404: Some roll nos not found."
+  );
+
+  const batches = studentDatas.map((s) => s.batch);
+  const batchDocs = await Batch.find({ batch: { $in: batches } });
+
+  for (let i = 0; i < batchDocs.length; i++) {
+    assert(
+      batchDocs[i].theory.find(
+        (t) => t.title.toLowerCase() === subject.toLowerCase()
+      ),
+      `ERROR 404: Subject ${subject} not found in batch ${batchDocs[i].batch}.`
+    );
+
+    assert(
+      batchDocs[i].theory.find(
+        (t) => t.title.toLowerCase() === subject.toLowerCase()
+      ).teacher === user.email,
+      `ERROR 403: You are not allowed to upload UT marks for ${subject} for ${batchDocs[i].batch} batch.`
+    );
+  }
 
   const newUTMarks = [];
 
@@ -458,7 +494,6 @@ const uploadUTMarksData = async (subject, utMarks) => {
     });
   }
 
-  const studentRecords = await StudentRecord.find().select("-_id -__v");
   const newStudentRecords = [];
   const brandNewStudentRecords = [];
 

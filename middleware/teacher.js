@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const assert = require("assert");
 
-const { JWT_PRIVATE_KEY, NODE_ENV } = require("../config");
+const { JWT_PRIVATE_KEY } = require("../config");
 const { Teacher } = require("../models/teacher");
 
 module.exports = async function (req, res, next) {
