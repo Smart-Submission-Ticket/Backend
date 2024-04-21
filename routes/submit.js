@@ -12,57 +12,16 @@ const {
   uploadAttendanceData,
   uploadAssignmentsData,
   uploadUTMarksData,
+  uploadCCData,
+  uploadMentorsData,
+  uploadTESeminarsData,
+  uploadBEProjectsData,
+  uploadHonorsData,
 } = require("../utils/upload_data");
 const { updateMinAttendanceAndUTMarks } = require("../utils/valid_records");
 const { StudentRecord } = require("../models/student_record");
 
 const router = express.Router();
-
-router.post("/ticket", admin, async (req, res) => {
-  /*
-    Request body should be like:
-    {
-      academicYear: "2023-2024",
-      attendanceLabAsst: "Name of the faculty",
-      studentAcheivementCommittee: "Name of the faculty",
-      attedance: {
-        minAttendanceRequired: 75,
-        updateAllData: false,
-      }
-      utmarks: {
-        minUTMarksRequired: 12,
-        updateAllData: false,
-      }
-    }
-  */
-  let ticketData = req.body;
-  const { attendance, utmarks } = ticketData;
-
-  if (attendance && attendance.minAttendanceRequired) {
-    ticketData.minAttendanceRequired = attendance.minAttendanceRequired;
-  }
-
-  if (utmarks && utmarks.minUTMarksRequired) {
-    ticketData.minUTMarksRequired = utmarks.minUTMarksRequired;
-  }
-
-  await TicketData.updateTicketData(ticketData);
-
-  if (ticketData.minAttendanceRequired || ticketData.minUTMarksRequired) {
-    await updateMinAttendanceAndUTMarks(true);
-  }
-
-  StudentRecord.updateStudentRecords({
-    updateAttendances: attendance ? true : false,
-    updateUTMarks: utmarks ? true : false,
-    updateAllAttendances: attendance
-      ? attendance.updateAllData ?? false
-      : false,
-    updateAllUTMarks: utmarks ? utmarks.updateAllData ?? false : false,
-  });
-
-  res.send({ message: "Ticket submission details updated." });
-});
 
 router.post("/classes", admin, upload.single("file"), async (req, res) => {
   const classes = readExcel(req.file.buffer);
@@ -90,6 +49,41 @@ router.post("/attendance", admin, upload.single("file"), async (req, res) => {
   res.send({ message: "Attendance updated." });
 });
 
+router.post(
+  "/class_coordinators",
+  admin,
+  upload.single("file"),
+  async (req, res) => {
+    const cc = readExcel(req.file.buffer);
+    await uploadCCData(cc);
+    res.send({ message: "Class coordinators updated." });
+  }
+);
+
+router.post("/mentors", admin, upload.single("file"), async (req, res) => {
+  const mentors = readExcel(req.file.buffer);
+  await uploadMentorsData(mentors);
+  res.send({ message: "Mentors updated." });
+});
+
+router.post("/te_seminars", admin, upload.single("file"), async (req, res) => {
+  const te_seminars = readExcel(req.file.buffer);
+  await uploadTESeminarsData(te_seminars);
+  res.send({ message: "TE seminars updated." });
+});
+
+router.post("/be_projects", admin, upload.single("file"), async (req, res) => {
+  const be_projects = readExcel(req.file.buffer);
+  await uploadBEProjectsData(be_projects);
+  res.send({ message: "BE projects updated." });
+});
+
+router.post("/honors", admin, upload.single("file"), async (req, res) => {
+  const honors = readExcel(req.file.buffer);
+  await uploadHonorsData(honors);
+  res.send({ message: "Honors updated." });
+});
+
 router.post("/assignments", upload.single("file"), async (req, res) => {
   const { subject } = req.body;
   assert(subject, "ERROR 400: Subject is required.");
@@ -106,6 +100,36 @@ router.post("/utmarks", upload.single("file"), async (req, res) => {
   const utmarks = readExcel(req.file.buffer);
   await uploadUTMarksData(subject, utmarks, req.user);
   res.send({ message: "UT marks updated." });
+});
+
+router.post("/ticket", admin, async (req, res) => {
+  let ticketData = req.body;
+  const { attendance, utmarks } = ticketData;
+
+  if (attendance && attendance.minAttendanceRequired) {
+    ticketData.minAttendanceRequired = attendance.minAttendanceRequired;
+  }
+
+  if (utmarks && utmarks.minUTMarksRequired) {
+    ticketData.minUTMarksRequired = utmarks.minUTMarksRequired;
+  }
+
+  await TicketData.updateTicketData(ticketData);
+
+  if (ticketData.minAttendanceRequired || ticketData.minUTMarksRequired) {
+    await updateMinAttendanceAndUTMarks(true);
+  }
+
+  StudentRecord.updateStudentRecords({
+    updateAttendances: attendance ? true : false,
+    updateUTMarks: utmarks ? true : false,
+    updateAllAttendances: attendance
+      ? attendance.updateAllData ?? false
+      : false,
+    updateAllUTMarks: utmarks ? utmarks.updateAllData ?? false : false,
+  });
+
+  res.send({ message: "Ticket submission details updated." });
 });
 
 module.exports = router;

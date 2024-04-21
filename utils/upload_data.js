@@ -639,6 +639,7 @@ const uploadTESeminarsData = async (teSeminars) => {
 
   const studentRecords = await StudentRecord.find().select("-_id -__v");
   const newTeSeminars = [];
+  const brandNewTeSeminars = [];
 
   for (let i = 0; i < teSeminars.length; i++) {
     const teacherEmail = teSeminars[i][0];
@@ -648,10 +649,6 @@ const uploadTESeminarsData = async (teSeminars) => {
       const rollNo = rollNos[j];
 
       if (rollNo === "") continue;
-      assert(
-        studentRecords.find((s) => s.rollNo === rollNo),
-        `ERROR 404: Roll No ${rollNo} not found.`
-      );
 
       // Check if rollNo is of 3rd year.
       assert(
@@ -659,21 +656,36 @@ const uploadTESeminarsData = async (teSeminars) => {
         `ERROR 403: Roll No ${rollNo} is not of 3rd year.`
       );
 
-      newTeSeminars.push({
-        rollNo,
-        teacherEmail,
-      });
+      if (studentRecords.find((s) => s.rollNo === rollNo)) {
+        newTeSeminars.push({
+          rollNo,
+          teacherEmail,
+        });
+      } else {
+        brandNewTeSeminars.push({
+          rollNo,
+          teacherEmail,
+        });
+      }
     }
   }
 
-  await StudentRecord.bulkWrite(
-    newTeSeminars.map((s) => ({
-      updateOne: {
-        filter: { rollNo: s.rollNo },
-        update: { $set: { "extra.te_seminar": s.teacherEmail } },
-      },
-    }))
-  );
+  await Promise.all([
+    StudentRecord.bulkWrite(
+      newTeSeminars.map((s) => ({
+        updateOne: {
+          filter: { rollNo: s.rollNo },
+          update: { $set: { "extra.te_seminar": s.teacherEmail } },
+        },
+      }))
+    ),
+    StudentRecord.insertMany(
+      brandNewTeSeminars.map((s) => ({
+        rollNo: s.rollNo,
+        "extra.te_seminar": s.teacherEmail,
+      }))
+    ),
+  ]);
 };
 
 const uploadBEProjectsData = async (beProjects) => {
@@ -681,6 +693,7 @@ const uploadBEProjectsData = async (beProjects) => {
 
   const studentRecords = await StudentRecord.find().select("-_id -__v");
   const newBEProjects = [];
+  const brandNewBEProjects = [];
 
   for (let i = 0; i < beProjects.length; i++) {
     const teacherEmail = beProjects[i][0];
@@ -690,10 +703,6 @@ const uploadBEProjectsData = async (beProjects) => {
       const rollNo = rollNos[j];
 
       if (rollNo === "") continue;
-      assert(
-        studentRecords.find((s) => s.rollNo === rollNo),
-        `ERROR 404: Roll No ${rollNo} not found.`
-      );
 
       // Check if rollNo is of 4th year.
       assert(
@@ -701,21 +710,36 @@ const uploadBEProjectsData = async (beProjects) => {
         `ERROR 403: Roll No ${rollNo} is not of 4th year.`
       );
 
-      newBEProjects.push({
-        rollNo,
-        teacherEmail,
-      });
+      if (studentRecords.find((s) => s.rollNo === rollNo)) {
+        newBEProjects.push({
+          rollNo,
+          teacherEmail,
+        });
+      } else {
+        brandNewBEProjects.push({
+          rollNo,
+          teacherEmail,
+        });
+      }
     }
   }
 
-  await StudentRecord.bulkWrite(
-    newBEProjects.map((s) => ({
-      updateOne: {
-        filter: { rollNo: s.rollNo },
-        update: { $set: { "extra.be_project": s.teacherEmail } },
-      },
-    }))
-  );
+  await Promise.all([
+    StudentRecord.bulkWrite(
+      newBEProjects.map((s) => ({
+        updateOne: {
+          filter: { rollNo: s.rollNo },
+          update: { $set: { "extra.be_project": s.teacherEmail } },
+        },
+      }))
+    ),
+    StudentRecord.insertMany(
+      brandNewBEProjects.map((s) => ({
+        rollNo: s.rollNo,
+        "extra.be_project": s.teacherEmail,
+      }))
+    ),
+  ]);
 };
 
 const uploadHonorsData = async (honors) => {
@@ -723,6 +747,7 @@ const uploadHonorsData = async (honors) => {
 
   const studentRecords = await StudentRecord.find().select("-_id -__v");
   const newHonors = [];
+  const brandNewHonors = [];
 
   for (let i = 0; i < honors.length; i++) {
     const teacherEmail = honors[i][0];
@@ -732,26 +757,37 @@ const uploadHonorsData = async (honors) => {
       const rollNo = rollNos[j];
 
       if (rollNo === "") continue;
-      assert(
-        studentRecords.find((s) => s.rollNo === rollNo),
-        `ERROR 404: Roll No ${rollNo} not found.`
-      );
 
-      newHonors.push({
-        rollNo,
-        teacherEmail,
-      });
+      if (studentRecords.find((s) => s.rollNo === rollNo)) {
+        newHonors.push({
+          rollNo,
+          teacherEmail,
+        });
+      } else {
+        brandNewHonors.push({
+          rollNo,
+          teacherEmail,
+        });
+      }
     }
   }
 
-  await StudentRecord.bulkWrite(
-    newHonors.map((s) => ({
-      updateOne: {
-        filter: { rollNo: s.rollNo },
-        update: { $set: { "extra.honor": s.teacherEmail } },
-      },
-    }))
-  );
+  await Promise.all([
+    StudentRecord.bulkWrite(
+      newHonors.map((s) => ({
+        updateOne: {
+          filter: { rollNo: s.rollNo },
+          update: { $set: { "extra.honor": s.teacherEmail } },
+        },
+      }))
+    ),
+    StudentRecord.insertMany(
+      brandNewHonors.map((s) => ({
+        rollNo: s.rollNo,
+        "extra.honor": s.teacherEmail,
+      }))
+    ),
+  ]);
 };
 
 module.exports = {

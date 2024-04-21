@@ -7,8 +7,15 @@ const updateMinAttendanceAndUTMarks = async (force = false) => {
   if (!force && _minAttendanceRequired && _minUTMarksRequired) return;
 
   const ticketData = await TicketData.getMinAttendanceAndUTMarks();
-  _minAttendanceRequired = ticketData.minAttendanceRequired || 75;
-  _minUTMarksRequired = ticketData.minUTMarksRequired || 12;
+
+  if (!ticketData) {
+    _minAttendanceRequired = 75;
+    _minUTMarksRequired = 12;
+    return;
+  }
+
+  _minAttendanceRequired = ticketData.minAttendanceRequired;
+  _minUTMarksRequired = ticketData.minUTMarksRequired;
 };
 
 const isValidAttendance = (attendance) => {
