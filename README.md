@@ -259,41 +259,41 @@
 
 ### Excel data
 
-1. `POST /fetch/classes`
+1.  `POST /fetch/classes`
 
-   - Will fetch all the classes and batches from google sheets.
+    - Will fetch all the classes and batches from google sheets.
 
-2. `POST /fetch/students`
+2.  `POST /fetch/students`
 
-   - Will fetch all the students from google sheets.
+    - Will fetch all the students from google sheets.
 
-3. `POST /fetch/curriculum`
+3.  `POST /fetch/curriculum`
 
-   - Will fetch all the curriculum from google sheets.
+    - Will fetch all the curriculum from google sheets.
 
-4. `POST /fetch/attendance`
+4.  `POST /fetch/attendance`
 
-   - Will fetch all the attendance from google sheets.
+    - Will fetch all the attendance from google sheets.
 
-5. `POST /fetch/class_coordinators`
+5.  `POST /fetch/class_coordinators`
 
-   - Will fetch all the class coordinators from google sheets.
+    - Will fetch all the class coordinators from google sheets.
 
-6. `POST /fetch/mentors`
+6.  `POST /fetch/mentors`
 
-   - Will fetch all the mentors from google sheets.
+    - Will fetch all the mentors from google sheets.
 
-7. `POST /fetch/te_seminars`
+7.  `POST /fetch/te_seminars`
 
-   - Will fetch all the TE seminars from google sheets.
+    - Will fetch all the TE seminars from google sheets.
 
-8. `POST /fetch/be_projects`
+8.  `POST /fetch/be_projects`
 
-   - Will fetch all the BE projects from google sheets.
+    - Will fetch all the BE projects from google sheets.
 
-9. `POST /fetch/honors`
+9.  `POST /fetch/honors`
 
-   - Will fetch all the honors from google sheets.
+    - Will fetch all the honors from google sheets.
 
 10. `POST /submit/classes`
 
@@ -343,7 +343,67 @@
       }
       ```
 
-14. `POST /submit/assignments`
+14. `POST /submit/class_coordinators`
+
+    - Will fetch all the class coordinators from excel file.
+
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "file": "class_coordinators.xlsx"
+      }
+      ```
+
+15. `POST /submit/mentors`
+
+    - Will fetch all the mentors from excel file.
+
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "file": "mentors.xlsx"
+      }
+      ```
+
+16. `POST /submit/te_seminars`
+
+    - Will fetch all the TE seminars from excel file.
+
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "file": "te_seminars.xlsx"
+      }
+      ```
+
+17. `POST /submit/be_projects`
+
+    - Will fetch all the BE projects from excel file.
+
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "file": "be_projects.xlsx"
+      }
+      ```
+
+18. `POST /submit/honors`
+
+    - Will fetch all the honors from excel file.
+
+    - Request (multipart/form-data):
+
+      ```json
+      {
+        "file": "honors.xlsx"
+      }
+      ```
+
+19. `POST /submit/assignments`
 
     - Will fetch all the assignments from excel file.
 
@@ -356,7 +416,7 @@
       }
       ```
 
-15. `POST /submit/utmarks`
+20. `POST /submit/utmarks`
 
     - Will fetch all the unit test marks from excel file.
 
@@ -369,7 +429,7 @@
       }
       ```
 
-16. `POST /submit/ticket`
+21. `POST /submit/ticket`
 
     - WIll update ticket submission details.
 
