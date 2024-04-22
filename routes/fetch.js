@@ -24,6 +24,8 @@ const {
   uploadHonorsData,
 } = require("../utils/upload_data");
 
+const { StudentRecord } = require("../models/student_record");
+
 const router = express.Router();
 
 router.post("/classes", async (req, res) => {
@@ -116,6 +118,7 @@ router.post("/all", async (req, res) => {
     uploadHonorsData(honors),
   ]);
 
+  StudentRecord.mergeRecordsByRollNo();
   res.send({ message: "All data updated." });
 });
 

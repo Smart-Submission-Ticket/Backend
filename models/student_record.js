@@ -135,6 +135,91 @@ studentRecordSchema.statics.updateStudentRecords = async function ({
   );
 };
 
+studentRecordSchema.statics.mergeRecordsByRollNo = async function () {
+  let students = await this.find();
+
+  let mergedRecords = {};
+  let duplicateRecordsRollNos = [];
+  let duplicateRecordsIds = [];
+
+  students.forEach((student) => {
+    let rollNo = student.rollNo;
+    if (!mergedRecords[rollNo]) {
+      mergedRecords[rollNo] = {
+        rollNo,
+        _id: student._id,
+      };
+    } else {
+      duplicateRecordsRollNos.push(rollNo);
+      duplicateRecordsIds.push(student._id);
+    }
+
+    if (student.attendance) {
+      mergedRecords[rollNo].attendance = student.attendance;
+      mergedRecords[rollNo].attendanceAlternate = student.attendanceAlternate;
+    }
+
+    if (student.unitTests) {
+      if (!mergedRecords[rollNo].unitTests)
+        mergedRecords[rollNo].unitTests = {};
+
+      for (let [key, ut] of student.unitTests) {
+        if (!mergedRecords[rollNo].unitTests[key])
+          mergedRecords[rollNo].unitTests[key] = {};
+
+        if (ut.ut1) {
+          mergedRecords[rollNo].unitTests[key].ut1 = ut.ut1;
+          mergedRecords[rollNo].unitTests[key].ut1Alternate = ut.ut1Alternate;
+        }
+
+        if (ut.ut2) {
+          mergedRecords[rollNo].unitTests[key].ut2 = ut.ut2;
+          mergedRecords[rollNo].unitTests[key].ut2Alternate = ut.ut2Alternate;
+        }
+      }
+    }
+
+    if (student.assignments) {
+      if (!mergedRecords[rollNo].assignments)
+        mergedRecords[rollNo].assignments = {};
+
+      for (let [key, assignment] of student.assignments) {
+        if (!mergedRecords[rollNo].assignments[key])
+          mergedRecords[rollNo].assignments[key] = {};
+
+        if (assignment.marks) {
+          mergedRecords[rollNo].assignments[key].marks = assignment.marks;
+          mergedRecords[rollNo].assignments[key].allCompleted =
+            assignment.allCompleted;
+        }
+      }
+    }
+
+    if (student.extra) {
+      if (!mergedRecords[rollNo].extra) mergedRecords[rollNo].extra = {};
+
+      for (let [key, value] of student.extra) {
+        mergedRecords[rollNo].extra[key] = value;
+      }
+    }
+  });
+
+  let recordsToUpdate = [];
+  for (let rollNo of duplicateRecordsRollNos) {
+    recordsToUpdate.push({
+      updateOne: {
+        filter: { _id: mergedRecords[rollNo]._id },
+        update: mergedRecords[rollNo],
+      },
+    });
+  }
+
+  await Promise.all([
+    this.deleteMany({ _id: { $in: duplicateRecordsIds } }),
+    this.bulkWrite(recordsToUpdate),
+  ]);
+};
+
 const StudentRecord = mongoose.model("StudentRecord", studentRecordSchema);
 
 exports.StudentRecord = StudentRecord;
