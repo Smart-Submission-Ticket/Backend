@@ -295,7 +295,11 @@
 
     - Will fetch all the honors from google sheets.
 
-10. `POST /submit/classes`
+10. `POST /fetch/all`
+
+    - Will fetch all the data from google sheets.
+
+11. `POST /submit/classes`
 
     - Will fetch all the classes and batches from excel file.
 
@@ -307,7 +311,7 @@
       }
       ```
 
-11. `POST /submit/students`
+12. `POST /submit/students`
 
     - Will fetch all the students from excel file.
 
@@ -319,7 +323,7 @@
       }
       ```
 
-12. `POST /submit/curriculum`
+13. `POST /submit/curriculum`
 
     - Will fetch all the curriculum from excel file.
 
@@ -331,7 +335,7 @@
       }
       ```
 
-13. `POST /submit/attendance`
+14. `POST /submit/attendance`
 
     - Will fetch all the attendance from excel file.
 
@@ -343,7 +347,7 @@
       }
       ```
 
-14. `POST /submit/class_coordinators`
+15. `POST /submit/class_coordinators`
 
     - Will fetch all the class coordinators from excel file.
 
@@ -355,7 +359,7 @@
       }
       ```
 
-15. `POST /submit/mentors`
+16. `POST /submit/mentors`
 
     - Will fetch all the mentors from excel file.
 
@@ -367,7 +371,7 @@
       }
       ```
 
-16. `POST /submit/te_seminars`
+17. `POST /submit/te_seminars`
 
     - Will fetch all the TE seminars from excel file.
 
@@ -379,7 +383,7 @@
       }
       ```
 
-17. `POST /submit/be_projects`
+18. `POST /submit/be_projects`
 
     - Will fetch all the BE projects from excel file.
 
@@ -391,7 +395,7 @@
       }
       ```
 
-18. `POST /submit/honors`
+19. `POST /submit/honors`
 
     - Will fetch all the honors from excel file.
 
@@ -403,7 +407,7 @@
       }
       ```
 
-19. `POST /submit/assignments`
+20. `POST /submit/assignments`
 
     - Will fetch all the assignments from excel file.
 
@@ -416,7 +420,7 @@
       }
       ```
 
-20. `POST /submit/utmarks`
+21. `POST /submit/utmarks`
 
     - Will fetch all the unit test marks from excel file.
 
@@ -429,7 +433,7 @@
       }
       ```
 
-21. `POST /submit/ticket`
+22. `POST /submit/ticket`
 
     - WIll update ticket submission details.
 

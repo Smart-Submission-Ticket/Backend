@@ -56,9 +56,13 @@ const uploadClassesData = async (classes) => {
 const uploadStudentsData = async (students) => {
   students = trimNestedArray(students);
 
-  const classes = await Classes.find();
-  const batchDocs = await Batch.find();
+  const [classes, batchDocs, studentsRecords] = await Promise.all([
+    Classes.find(),
+    Batch.find(),
+    StudentRecord.find(),
+  ]);
   const newStudents = [];
+  const newStudentsRecords = [];
 
   let batch = "";
   let rollNos = [];
@@ -78,6 +82,10 @@ const uploadStudentsData = async (students) => {
         class: classes.find((c) => c.batches.includes(batch)).class,
         year: classes.find((c) => c.batches.includes(batch)).year,
       });
+
+      if (!studentsRecords.find((s) => s.rollNo === rollNo)) {
+        newStudentsRecords.push(rollNo);
+      }
     }
 
     const batchDoc = batchDocs.find((b) => b.batch === batch);
@@ -120,6 +128,7 @@ const uploadStudentsData = async (students) => {
         },
       }))
     ),
+    StudentRecord.insertMany(newStudentsRecords.map((s) => ({ rollNo: s }))),
   ]);
 };
 

@@ -80,4 +80,43 @@ router.post("/honors", async (req, res) => {
   res.send({ message: "Honors updated." });
 });
 
+router.post("/all", async (req, res) => {
+  const [
+    classes,
+    students,
+    curriculum,
+    attendance,
+    cc,
+    mentors,
+    teSeminars,
+    beProjects,
+    honors,
+  ] = await Promise.all([
+    getClassesSpreadSheetValues(),
+    getStudentsSpreadSheetValues(),
+    getCurriculumSpreadSheetValues(),
+    getAttendanceSpreadSheetValues(),
+    getCCSpreadSheetValues(),
+    getMentorsSpreadSheetValues(),
+    getTESeminarsSpreadSheetValues(),
+    getBEProjectsSpreadSheetValues(),
+    getHonorsSpreadSheetValues(),
+  ]);
+
+  await uploadClassesData(classes);
+  await uploadCurriculumData(curriculum);
+  await uploadStudentsData(students);
+
+  await Promise.all([
+    uploadAttendanceData(attendance),
+    uploadCCData(cc),
+    uploadMentorsData(mentors),
+    uploadTESeminarsData(teSeminars),
+    uploadBEProjectsData(beProjects),
+    uploadHonorsData(honors),
+  ]);
+
+  res.send({ message: "All data updated." });
+});
+
 module.exports = router;
