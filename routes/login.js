@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
 
   const [student, teacher] = await Promise.all([
     StudentLogin.findOne({ email }),
-    Teacher.findOne({ email }),
+    Teacher.findOne({ email, isRegistered: true }),
   ]);
 
   const user = student || teacher;
