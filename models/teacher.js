@@ -30,6 +30,22 @@ teacherSchema.methods.generateAuthToken = function () {
   return token;
 };
 
+teacherSchema.statics.removeDuplicates = async function () {
+  const teachers = await Teacher.find();
+  const emailToTeacher = {};
+  for (const teacher of teachers) {
+    if (emailToTeacher[teacher.email]) {
+      if (teacher.isRegistered) {
+        await Teacher.deleteMany({ email: teacher.email, isRegistered: false });
+      } else {
+        await Teacher.deleteOne({ _id: teacher._id });
+      }
+    } else {
+      emailToTeacher[teacher.email] = teacher;
+    }
+  }
+};
+
 const Teacher = mongoose.model("Teacher", teacherSchema);
 
 function validateTeacher(teacher) {

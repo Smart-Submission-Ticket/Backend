@@ -25,10 +25,10 @@ router.post("/", async (req, res) => {
   ]);
 
   const user = student || teacher;
-  assert(user, "ERROR 400: Invalid email/password.");
+  assert(user, "ERROR 400: User not found.");
 
   const isValid = await bcrypt.compare(password, user.password);
-  assert(isValid, "ERROR 400: Invalid email/password.");
+  assert(isValid, "ERROR 400: Invalid password.");
 
   addDevice(req, email);
 

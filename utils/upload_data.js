@@ -259,6 +259,8 @@ const uploadCurriculumData = async (curriculum) => {
     ),
     Teacher.insertMany(newTeachers),
   ]);
+
+  Teacher.removeDuplicates();
 };
 
 const uploadAttendanceData = async (attendance) => {
@@ -601,6 +603,8 @@ const uploadCCData = async (cc) => {
     ),
     Teacher.insertMany(newTeachers),
   ]);
+
+  Teacher.removeDuplicates();
 };
 
 const uploadMentorsData = async (mentors) => {
@@ -654,6 +658,8 @@ const uploadMentorsData = async (mentors) => {
     ),
     Teacher.insertMany(newTeachers),
   ]);
+
+  Teacher.removeDuplicates();
 };
 
 const uploadTESeminarsData = async (teSeminars) => {
@@ -719,6 +725,8 @@ const uploadTESeminarsData = async (teSeminars) => {
     ),
     Teacher.insertMany(newTeachers),
   ]);
+
+  Teacher.removeDuplicates();
 };
 
 const uploadBEProjectsData = async (beProjects) => {
@@ -784,6 +792,8 @@ const uploadBEProjectsData = async (beProjects) => {
     ),
     Teacher.insertMany(newTeachers),
   ]);
+
+  Teacher.removeDuplicates();
 };
 
 const uploadHonorsData = async (honors) => {
@@ -844,6 +854,8 @@ const uploadHonorsData = async (honors) => {
     ),
     Teacher.insertMany(newTeachers),
   ]);
+
+  Teacher.removeDuplicates();
 };
 
 module.exports = {
