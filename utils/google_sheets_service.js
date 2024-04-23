@@ -141,6 +141,111 @@ async function updateAttendanceSpreadSheetValues(attendance) {
   return res;
 }
 
+async function _updateSpreadSheetValues(spreadsheetId, range, values) {
+  const auth = await getAuthToken();
+
+  const res = sheets.spreadsheets.values.update({
+    auth,
+    spreadsheetId,
+    range,
+    valueInputOption: "USER_ENTERED",
+    resource: {
+      values,
+    },
+  });
+
+  return res;
+}
+
+function _convertToMajorDimensionRows(values) {
+  const rows = [];
+  const longestRow = Math.max(...values.map((v) => v.length));
+  for (let i = 0; i < longestRow; i++) {
+    rows.push(values.map((v) => v[i] || ""));
+  }
+
+  return rows;
+}
+
+async function uploadClassesDataToSpreadSheet(classes) {
+  await _updateSpreadSheetValues(
+    CLASSES_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(classes)
+  );
+}
+
+async function uploadStudentsDataToSpreadSheet(students) {
+  await _updateSpreadSheetValues(
+    STUDENTS_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(students)
+  );
+}
+
+async function uploadCurriculumDataToSpreadSheet(curriculum) {
+  await Promise.all([
+    _updateSpreadSheetValues(
+      CURRICULUM_SHEET_ID,
+      "Theory",
+      _convertToMajorDimensionRows(curriculum.theory)
+    ),
+    _updateSpreadSheetValues(
+      CURRICULUM_SHEET_ID,
+      "Practical",
+      _convertToMajorDimensionRows(curriculum.practical)
+    ),
+  ]);
+}
+
+async function uploadAttendanceDataToSpreadSheet(attendance) {
+  await _updateSpreadSheetValues(
+    ATTENDANCE_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(attendance)
+  );
+}
+
+async function uploadCCDataToSpreadSheet(cc) {
+  await _updateSpreadSheetValues(
+    CC_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(cc)
+  );
+}
+
+async function uploadMentorsDataToSpreadSheet(mentors) {
+  await _updateSpreadSheetValues(
+    MENTORS_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(mentors)
+  );
+}
+
+async function uploadTESeminarsDataToSpreadSheet(te_seminars) {
+  await _updateSpreadSheetValues(
+    TE_SEMINARS_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(te_seminars)
+  );
+}
+
+async function uploadBEProjectsDataToSpreadSheet(be_projects) {
+  await _updateSpreadSheetValues(
+    BE_PROJECTS_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(be_projects)
+  );
+}
+
+async function uploadHonorsDataToSpreadSheet(honors) {
+  await _updateSpreadSheetValues(
+    HONORS_SHEET_ID,
+    "Sheet1",
+    _convertToMajorDimensionRows(honors)
+  );
+}
+
 module.exports = {
   getStudentsSpreadSheetValues,
   getCurriculumSpreadSheetValues,
@@ -152,4 +257,13 @@ module.exports = {
   getBEProjectsSpreadSheetValues,
   getHonorsSpreadSheetValues,
   updateAttendanceSpreadSheetValues,
+  uploadClassesDataToSpreadSheet,
+  uploadStudentsDataToSpreadSheet,
+  uploadCurriculumDataToSpreadSheet,
+  uploadAttendanceDataToSpreadSheet,
+  uploadCCDataToSpreadSheet,
+  uploadMentorsDataToSpreadSheet,
+  uploadTESeminarsDataToSpreadSheet,
+  uploadBEProjectsDataToSpreadSheet,
+  uploadHonorsDataToSpreadSheet,
 };

@@ -21,12 +21,24 @@ const {
 const { StudentRecord } = require("../models/student_record");
 const { updateMinAttendanceAndUTMarks } = require("../utils/valid_records");
 const logs = require("../utils/logs");
+const {
+  uploadClassesDataToSpreadSheet,
+  uploadStudentsDataToSpreadSheet,
+  uploadCurriculumDataToSpreadSheet,
+  uploadAttendanceDataToSpreadSheet,
+  uploadCCDataToSpreadSheet,
+  uploadMentorsDataToSpreadSheet,
+  uploadTESeminarsDataToSpreadSheet,
+  uploadBEProjectsDataToSpreadSheet,
+  uploadHonorsDataToSpreadSheet,
+} = require("../utils/google_sheets_service");
 
 const router = express.Router();
 
 router.post("/classes", admin, upload.single("file"), async (req, res) => {
   const classes = readExcel(req.file.buffer);
   await uploadClassesData(classes);
+  uploadClassesDataToSpreadSheet(classes);
   logs(req, "Updated classes via file.");
   res.send({ message: "Classes updated." });
 });
@@ -34,6 +46,7 @@ router.post("/classes", admin, upload.single("file"), async (req, res) => {
 router.post("/students", admin, upload.single("file"), async (req, res) => {
   const students = readExcel(req.file.buffer);
   await uploadStudentsData(students);
+  uploadStudentsDataToSpreadSheet(students);
   logs(req, "Updated students via file.");
   res.send({ message: "Allowed students updated." });
 });
@@ -43,6 +56,7 @@ router.post("/curriculum", admin, upload.single("file"), async (req, res) => {
   const practical = readExcel(req.file.buffer, "Practical");
   const curriculum = { theory, practical };
   await uploadCurriculumData(curriculum);
+  uploadCurriculumDataToSpreadSheet(curriculum);
   logs(req, "Updated curriculum via file.");
   res.send({ message: "Curriculum updated." });
 });
@@ -50,6 +64,7 @@ router.post("/curriculum", admin, upload.single("file"), async (req, res) => {
 router.post("/attendance", admin, upload.single("file"), async (req, res) => {
   const attendance = readExcel(req.file.buffer);
   await uploadAttendanceData(attendance);
+  uploadAttendanceDataToSpreadSheet(attendance);
   logs(req, "Updated attendance via file.");
   res.send({ message: "Attendance updated." });
 });
@@ -61,6 +76,7 @@ router.post(
   async (req, res) => {
     const cc = readExcel(req.file.buffer);
     await uploadCCData(cc);
+    uploadCCDataToSpreadSheet(cc);
     logs(req, "Updated class coordinators via file.");
     res.send({ message: "Class coordinators updated." });
   }
@@ -69,6 +85,7 @@ router.post(
 router.post("/mentors", admin, upload.single("file"), async (req, res) => {
   const mentors = readExcel(req.file.buffer);
   await uploadMentorsData(mentors);
+  uploadMentorsDataToSpreadSheet(mentors);
   logs(req, "Updated mentors via file.");
   res.send({ message: "Mentors updated." });
 });
@@ -76,6 +93,7 @@ router.post("/mentors", admin, upload.single("file"), async (req, res) => {
 router.post("/te_seminars", admin, upload.single("file"), async (req, res) => {
   const te_seminars = readExcel(req.file.buffer);
   await uploadTESeminarsData(te_seminars);
+  uploadTESeminarsDataToSpreadSheet(te_seminars);
   logs(req, "Updated TE seminars via file.");
   res.send({ message: "TE seminars updated." });
 });
@@ -83,6 +101,7 @@ router.post("/te_seminars", admin, upload.single("file"), async (req, res) => {
 router.post("/be_projects", admin, upload.single("file"), async (req, res) => {
   const be_projects = readExcel(req.file.buffer);
   await uploadBEProjectsData(be_projects);
+  uploadBEProjectsDataToSpreadSheet(be_projects);
   logs(req, "Updated BE projects via file.");
   res.send({ message: "BE projects updated." });
 });
@@ -90,6 +109,7 @@ router.post("/be_projects", admin, upload.single("file"), async (req, res) => {
 router.post("/honors", admin, upload.single("file"), async (req, res) => {
   const honors = readExcel(req.file.buffer);
   await uploadHonorsData(honors);
+  uploadHonorsDataToSpreadSheet(honors);
   logs(req, "Updated honors via file.");
   res.send({ message: "Honors updated." });
 });
