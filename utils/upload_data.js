@@ -550,8 +550,12 @@ const uploadUTMarksData = async (subject, utMarks, user) => {
 const uploadCCData = async (cc) => {
   cc = trimNestedArray(cc);
 
-  const classes = await Classes.find();
+  const [classes, teachers] = await Promise.all([
+    Classes.find(),
+    Teacher.find(),
+  ]);
   const newCCs = [];
+  const newTeachers = [];
 
   for (let i = 0; i < cc.length; i++) {
     if (cc[i][1].trim().toLowerCase().includes("class")) {
@@ -574,27 +578,37 @@ const uploadCCData = async (cc) => {
           class: class_,
           cc: ccEmail,
         });
+
+        if (!teachers.find((t) => t.email === ccEmail)) {
+          newTeachers.push({
+            email: ccEmail,
+          });
+        }
       }
 
       i++;
     }
   }
 
-  await Classes.bulkWrite(
-    newCCs.map((c) => ({
-      updateOne: {
-        filter: { class: c.class },
-        update: { coordinator: c.cc },
-      },
-    }))
-  );
+  await Promise.all([
+    Classes.bulkWrite(
+      newCCs.map((c) => ({
+        updateOne: {
+          filter: { class: c.class },
+          update: { coordinator: c.cc },
+        },
+      }))
+    ),
+    Teacher.insertMany(newTeachers),
+  ]);
 };
 
 const uploadMentorsData = async (mentors) => {
   mentors = trimNestedArray(mentors);
 
-  const batches = await Batch.find();
+  const [batches, teachers] = await Promise.all([Batch.find(), Teacher.find()]);
   const newMentors = [];
+  const newTeachers = [];
 
   for (let i = 0; i < mentors.length; i++) {
     if (mentors[i][2].trim().toLowerCase().includes("batch")) {
@@ -617,28 +631,41 @@ const uploadMentorsData = async (mentors) => {
           batch,
           mentor: mentorEmail,
         });
+
+        if (!teachers.find((t) => t.email === mentorEmail)) {
+          newTeachers.push({
+            email: mentorEmail,
+          });
+        }
       }
 
       i++;
     }
   }
 
-  await Batch.bulkWrite(
-    newMentors.map((m) => ({
-      updateOne: {
-        filter: { batch: m.batch },
-        update: { mentor: m.mentor },
-      },
-    }))
-  );
+  await Promise.all([
+    Batch.bulkWrite(
+      newMentors.map((m) => ({
+        updateOne: {
+          filter: { batch: m.batch },
+          update: { mentor: m.mentor },
+        },
+      }))
+    ),
+    Teacher.insertMany(newTeachers),
+  ]);
 };
 
 const uploadTESeminarsData = async (teSeminars) => {
   teSeminars = trimNestedArray(teSeminars);
 
-  const studentRecords = await StudentRecord.find().select("-_id -__v");
+  const [studentRecords, teachers] = await Promise.all([
+    StudentRecord.find().select("-_id -__v"),
+    Teacher.find(),
+  ]);
   const newTeSeminars = [];
   const brandNewTeSeminars = [];
+  const newTeachers = [];
 
   for (let i = 0; i < teSeminars.length; i++) {
     const teacherEmail = teSeminars[i][0];
@@ -666,6 +693,12 @@ const uploadTESeminarsData = async (teSeminars) => {
           teacherEmail,
         });
       }
+
+      if (!teachers.find((t) => t.email === teacherEmail)) {
+        newTeachers.push({
+          email: teacherEmail,
+        });
+      }
     }
   }
 
@@ -684,15 +717,20 @@ const uploadTESeminarsData = async (teSeminars) => {
         "extra.te_seminar": s.teacherEmail,
       }))
     ),
+    Teacher.insertMany(newTeachers),
   ]);
 };
 
 const uploadBEProjectsData = async (beProjects) => {
   beProjects = trimNestedArray(beProjects);
 
-  const studentRecords = await StudentRecord.find().select("-_id -__v");
+  const [studentRecords, teachers] = await Promise.all([
+    StudentRecord.find().select("-_id -__v"),
+    Teacher.find(),
+  ]);
   const newBEProjects = [];
   const brandNewBEProjects = [];
+  const newTeachers = [];
 
   for (let i = 0; i < beProjects.length; i++) {
     const teacherEmail = beProjects[i][0];
@@ -720,6 +758,12 @@ const uploadBEProjectsData = async (beProjects) => {
           teacherEmail,
         });
       }
+
+      if (!teachers.find((t) => t.email === teacherEmail)) {
+        newTeachers.push({
+          email: teacherEmail,
+        });
+      }
     }
   }
 
@@ -738,15 +782,21 @@ const uploadBEProjectsData = async (beProjects) => {
         "extra.be_project": s.teacherEmail,
       }))
     ),
+    Teacher.insertMany(newTeachers),
   ]);
 };
 
 const uploadHonorsData = async (honors) => {
   honors = trimNestedArray(honors);
 
-  const studentRecords = await StudentRecord.find().select("-_id -__v");
+  const [studentRecords, teachers] = await Promise.all([
+    StudentRecord.find().select("-_id -__v"),
+    Teacher.find(),
+  ]);
+
   const newHonors = [];
   const brandNewHonors = [];
+  const newTeachers = [];
 
   for (let i = 0; i < honors.length; i++) {
     const teacherEmail = honors[i][0];
@@ -768,6 +818,12 @@ const uploadHonorsData = async (honors) => {
           teacherEmail,
         });
       }
+
+      if (!teachers.find((t) => t.email === teacherEmail)) {
+        newTeachers.push({
+          email: teacherEmail,
+        });
+      }
     }
   }
 
@@ -786,6 +842,7 @@ const uploadHonorsData = async (honors) => {
         "extra.honor": s.teacherEmail,
       }))
     ),
+    Teacher.insertMany(newTeachers),
   ]);
 };
 
