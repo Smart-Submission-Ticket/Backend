@@ -408,28 +408,10 @@ router.get("/batch/:batch/subject/:subject", teacher, async (req, res) => {
   const student_records = {};
   const batches = {};
 
-  const ccEmail = class_.coordinator;
-  const ccName = teachers.find((t) => t.email === ccEmail)
-    ? teachers.find((t) => t.email === ccEmail).name
-    : "";
-
-  const mentorEmail = batchDoc.mentor;
-  const mentorName = teachers.find((t) => t.email === mentorEmail)
-    ? teachers.find((t) => t.email === mentorEmail).name
-    : "";
-
   batches[batchDoc.batch] = {
     batch: batchDoc.batch,
     class: batchDoc.class,
     year: batchDoc.year,
-    class_coordinator: {
-      email: ccEmail,
-      name: ccName,
-    },
-    mentor: {
-      email: mentorEmail,
-      name: mentorName,
-    },
     subjects: {
       theory: batchDoc.theory.map((theory) => {
         return {
@@ -537,28 +519,10 @@ router.get("/class/:class/subject/:subject", teacher, async (req, res) => {
   const batches = {};
 
   batchDocs.forEach((batchDoc) => {
-    const ccEmail = class_.coordinator;
-    const ccName = teachers.find((t) => t.email === ccEmail)
-      ? teachers.find((t) => t.email === ccEmail).name
-      : "";
-
-    const mentorEmail = batchDoc.mentor;
-    const mentorName = teachers.find((t) => t.email === mentorEmail)
-      ? teachers.find((t) => t.email === mentorEmail).name
-      : "";
-
     batches[batchDoc.batch] = {
       batch: batchDoc.batch,
       class: batchDoc.class,
       year: batchDoc.year,
-      class_coordinator: {
-        email: ccEmail,
-        name: ccName,
-      },
-      mentor: {
-        email: mentorEmail,
-        name: mentorName,
-      },
       subjects: {
         theory: batchDoc.theory.map((theory) => {
           return {
