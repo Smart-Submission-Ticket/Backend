@@ -158,45 +158,13 @@
   }
   ```
 
-2. `POST /login/student`
+2. `DELETE /login`
 
-   - Request Body:
+   - Will logout the user.
 
-     ```json
-     {
-       "email": "abc@gmail.com",
-       "password": "password"
-     }
-     ```
+   - Request headers:
 
-   - Response:
-     ```json
-     {
-       "message": "Student logged in successfully"
-     }
-     ```
-   - Response headers:
-     - `x-auth-token`: "jwt-token for student authentication"
-
-3. `POST /login/teacher`
-
-   - Request Body:
-
-     ```json
-     {
-       "email": "abc@gmail.com",
-       "password": "password"
-     }
-     ```
-
-   - Response:
-     ```json
-     {
-       "message": "Teacher logged in successfully"
-     }
-     ```
-   - Response headers:
-     - `x-auth-token`: "jwt-token for teacher authentication"
+     - `x-auth-token`: "jwt-token for student/teacher authentication"
 
 ### Forgot Password
 

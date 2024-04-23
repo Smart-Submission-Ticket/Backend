@@ -1,4 +1,5 @@
 const cors = require("cors");
+const useragent = require("express-useragent");
 
 module.exports = function (app) {
   app.use(
@@ -6,4 +7,6 @@ module.exports = function (app) {
       exposedHeaders: ["x-auth-token"],
     })
   );
+
+  app.use(useragent.express());
 };

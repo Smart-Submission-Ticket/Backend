@@ -10,6 +10,7 @@ const { OTP } = require("../models/otp");
 const { StudentLogin, validate } = require("../models/student_login");
 const { Batch } = require("../models/batch");
 const { generateOtp, sendRegistrationOtpMail } = require("../utils/send_mail");
+const { addDevice } = require("../utils/devices");
 
 const router = express.Router();
 
@@ -114,6 +115,7 @@ router.post("/", async (req, res) => {
     ),
   ]);
 
+  addDevice(req, studentData.email);
   const x_auth_token = newStudent.generateAuthToken();
 
   res

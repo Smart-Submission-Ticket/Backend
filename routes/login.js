@@ -7,8 +7,9 @@ const { JWT_PRIVATE_KEY } = require("../config");
 const { StudentLogin } = require("../models/student_login");
 const { Teacher } = require("../models/teacher");
 const { OTP } = require("../models/otp");
-
+const auth = require("../middleware/auth");
 const { sendForgotPasswordMail, generateOtp } = require("../utils/send_mail");
+const { addDevice, removeDevice } = require("../utils/devices");
 
 const router = express.Router();
 
@@ -29,6 +30,8 @@ router.post("/", async (req, res) => {
   const isValid = await bcrypt.compare(password, user.password);
   assert(isValid, "ERROR 400: Invalid email/password.");
 
+  addDevice(req, email);
+
   const x_auth_token = user.generateAuthToken();
   res.header("x-auth-token", x_auth_token).send({
     message: "Login successful.",
@@ -38,6 +41,13 @@ router.post("/", async (req, res) => {
       ...(student && { rollNo: user.rollNo }),
       ...(teacher && { name: user.name }),
     },
+  });
+});
+
+router.delete("/", auth, async (req, res) => {
+  removeDevice(req, req.user.email);
+  res.status(200).send({
+    message: "Logout successful.",
   });
 });
 

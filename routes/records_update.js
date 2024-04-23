@@ -8,6 +8,7 @@ const { Batch } = require("../models/batch");
 const {
   updateAttendanceSpreadSheetValues,
 } = require("../utils/google_sheets_service");
+const logs = require("../utils/logs");
 
 const router = express.Router();
 
@@ -91,6 +92,7 @@ router.post("/attendance", admin, async (req, res) => {
   );
 
   updateAttendanceSpreadSheetValues(attendance);
+  logs(req, `Attendance updated for ${attendance.length} students.`);
   res.send({ message: "Attendance updated.", attendance });
 });
 
@@ -219,6 +221,7 @@ router.post("/utmarks/:subject", async (req, res) => {
     }))
   );
 
+  logs(req, `UT marks updated for ${utmarks.length} students for ${subject}.`);
   res.send({ message: "UT marks updated.", utmarks });
 });
 
@@ -294,6 +297,10 @@ router.post("/assignments/:subject", async (req, res) => {
     }))
   );
 
+  logs(
+    req,
+    `Assignments updated for ${assignments.length} students for ${subject}.`
+  );
   res.send({ message: "Assignments updated.", assignments });
 });
 

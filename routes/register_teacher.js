@@ -5,8 +5,9 @@ const jwt = require("jsonwebtoken");
 
 const { JWT_PRIVATE_KEY } = require("../config");
 const { OTP } = require("../models/otp");
-const { generateOtp, sendRegistrationOtpMail } = require("../utils/send_mail");
 const { Teacher } = require("../models/teacher");
+const { generateOtp, sendRegistrationOtpMail } = require("../utils/send_mail");
+const { addDevice } = require("../utils/devices");
 
 const router = express.Router();
 
@@ -85,6 +86,8 @@ router.post("/", async (req, res) => {
       isRegistered: true,
     }
   );
+
+  addDevice(req, email);
 
   const x_auth_token = teacher.generateAuthToken();
 
