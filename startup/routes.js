@@ -20,7 +20,7 @@ module.exports = function (app) {
   app.use("/register/student", registerStudent);
   app.use("/register/teacher", registerTeacher);
   app.use("/login", login);
-  app.use("/fetch", admin, fetch);
+  app.use("/fetch", teacher, admin, fetch);
   app.use("/submit", teacher, submit);
   app.use("/classes", classes);
   app.use("/records", records);
