@@ -103,7 +103,7 @@ async function updateAttendanceSpreadSheetValues(attendance) {
 
   const rollNoToValue = {};
   attendance.forEach((a) => {
-    rollNoToValue[a.rollNo] = a.value;
+    rollNoToValue[a.rollNo] = a.attendance;
   });
 
   const newAttendance = [];
