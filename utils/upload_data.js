@@ -338,11 +338,6 @@ const uploadAssignmentsData = async (subject, assignments, user) => {
     StudentData.find({ rollNo: { $in: rollNos } }),
   ]);
 
-  assert(
-    studentDatas.length === rollNos.length,
-    "ERROR 404: Some roll nos not found."
-  );
-
   const batches = studentDatas.map((s) => s.batch);
   const batchDocs = await Batch.find({ batch: { $in: batches } });
 
@@ -455,11 +450,6 @@ const uploadUTMarksData = async (subject, utMarks, user) => {
     StudentRecord.find().select("-_id -__v"),
     StudentData.find({ rollNo: { $in: rollNos } }),
   ]);
-
-  assert(
-    studentDatas.length === rollNos.length,
-    "ERROR 404: Some roll nos not found."
-  );
 
   const batches = studentDatas.map((s) => s.batch);
   const batchDocs = await Batch.find({ batch: { $in: batches } });
