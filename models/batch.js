@@ -54,15 +54,12 @@ const batchSchema = new mongoose.Schema({
       },
     },
   ],
-  mentor: {
-    type: String,
-  },
 });
 
 batchSchema.statics.getAssignedPracticalBatches = async function (teacher) {
   const batches = await this.find({
     "practical.teacher": teacher,
-  }).select("-_id -__v -students -rollNos -mentor -theory");
+  }).select("-_id -__v -students -rollNos -theory");
 
   const practicalBatches = batches.map((batch) => {
     return {
@@ -81,7 +78,7 @@ batchSchema.statics.getAssignedPracticalBatches = async function (teacher) {
 batchSchema.statics.getAssignedTheoryClasses = async function (teacher) {
   const batches = await this.find({
     "theory.teacher": teacher,
-  }).select("-_id -__v -students -rollNos -mentor -practical");
+  }).select("-_id -__v -students -rollNos -practical");
 
   const theoryClasses = batches.reduce((result, batch) => {
     const existingClass = result.find((item) => item.class === batch.class);
@@ -96,22 +93,6 @@ batchSchema.statics.getAssignedTheoryClasses = async function (teacher) {
   }, []);
 
   return theoryClasses;
-};
-
-batchSchema.statics.getMentoringBatches = async function (teacher) {
-  const batches = await this.find({
-    mentor: teacher,
-  }).select("-_id -__v -students -rollNos -theory -practical");
-
-  const mentoringBatches = batches.map((batch) => {
-    return {
-      year: batch.year,
-      class: batch.class,
-      batch: batch.batch,
-    };
-  });
-
-  return mentoringBatches;
 };
 
 const Batch = mongoose.model("Batch", batchSchema);

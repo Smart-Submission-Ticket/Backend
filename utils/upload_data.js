@@ -610,50 +610,56 @@ const uploadCCData = async (cc) => {
 const uploadMentorsData = async (mentors) => {
   mentors = trimNestedArray(mentors);
 
-  const [batches, teachers] = await Promise.all([Batch.find(), Teacher.find()]);
+  const [studentRecords, teachers] = await Promise.all([
+    StudentRecord.find().select("-_id -__v"),
+    Teacher.find(),
+  ]);
   const newMentors = [];
+  const brandNewMentors = [];
   const newTeachers = [];
 
   for (let i = 0; i < mentors.length; i++) {
-    if (mentors[i][2].trim().toLowerCase().includes("batch")) {
-      const _batches = mentors[i].slice(3);
-      const _mentors = mentors[i + 1].slice(3);
+    const teacherEmail = mentors[i][0];
+    const rollNos = mentors[i].slice(1);
 
-      for (let j = 0; j < _batches.length; j++) {
-        const batch = _batches[j];
-        const mentorEmail = _mentors[j];
+    for (let j = 0; j < rollNos.length; j++) {
+      const rollNo = rollNos[j];
 
-        if (!batch || batch === "") continue;
-        if (!mentorEmail || mentorEmail === "") continue;
+      if (rollNo === "") continue;
 
-        assert(
-          batches.find((b) => b.batch === batch),
-          `ERROR 404: Batch ${batch} not found.`
-        );
-
+      if (studentRecords.find((s) => s.rollNo === rollNo)) {
         newMentors.push({
-          batch,
-          mentor: mentorEmail,
+          rollNo,
+          teacherEmail,
         });
-
-        if (!teachers.find((t) => t.email === mentorEmail)) {
-          newTeachers.push({
-            email: mentorEmail,
-          });
-        }
+      } else {
+        brandNewMentors.push({
+          rollNo,
+          teacherEmail,
+        });
       }
 
-      i++;
+      if (!teachers.find((t) => t.email === teacherEmail)) {
+        newTeachers.push({
+          email: teacherEmail,
+        });
+      }
     }
   }
 
   await Promise.all([
-    Batch.bulkWrite(
-      newMentors.map((m) => ({
+    StudentRecord.bulkWrite(
+      newMentors.map((s) => ({
         updateOne: {
-          filter: { batch: m.batch },
-          update: { mentor: m.mentor },
+          filter: { rollNo: s.rollNo },
+          update: { $set: { "extra.mentor": s.teacherEmail } },
         },
+      }))
+    ),
+    StudentRecord.insertMany(
+      brandNewMentors.map((s) => ({
+        rollNo: s.rollNo,
+        "extra.mentor": s.teacherEmail,
       }))
     ),
     Teacher.insertMany(newTeachers),

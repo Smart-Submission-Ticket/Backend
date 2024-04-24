@@ -60,22 +60,16 @@ router.get("/subjects", async (req, res) => {
 });
 
 router.get("/assigned", teacher, async (req, res) => {
-  const [
-    practicalBatches,
-    theoryClasses,
-    mentoringBatches,
-    coordinatingClasses,
-  ] = await Promise.all([
-    Batch.getAssignedPracticalBatches(req.user.email),
-    Batch.getAssignedTheoryClasses(req.user.email),
-    Batch.getMentoringBatches(req.user.email),
-    Classes.getCoordinatingClasses(req.user.email),
-  ]);
+  const [practicalBatches, theoryClasses, coordinatingClasses] =
+    await Promise.all([
+      Batch.getAssignedPracticalBatches(req.user.email),
+      Batch.getAssignedTheoryClasses(req.user.email),
+      Classes.getCoordinatingClasses(req.user.email),
+    ]);
 
   res.send({
     practicalBatches,
     theoryClasses,
-    mentoringBatches,
     coordinatingClasses,
   });
 });
