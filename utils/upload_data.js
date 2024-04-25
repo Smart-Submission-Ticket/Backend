@@ -352,9 +352,10 @@ const uploadAssignmentsData = async (subject, assignments, user) => {
     );
 
     assert(
-      batchDocs[i].practical.find(
-        (p) => p.title.toLowerCase() === subject.toLowerCase()
-      ).teacher === user.email,
+      user.role === "admin" ||
+        batchDocs[i].practical.find(
+          (p) => p.title.toLowerCase() === subject.toLowerCase()
+        ).teacher === user.email,
       `ERROR 403: You are not allowed to upload assignments for ${subject} for ${batchDocs[i].batch} batch.`
     );
   }
@@ -465,9 +466,10 @@ const uploadUTMarksData = async (subject, utMarks, user) => {
     );
 
     assert(
-      batchDocs[i].theory.find(
-        (t) => t.title.toLowerCase() === subject.toLowerCase()
-      ).teacher === user.email,
+      user.role === "admin" ||
+        batchDocs[i].theory.find(
+          (t) => t.title.toLowerCase() === subject.toLowerCase()
+        ).teacher === user.email,
       `ERROR 403: You are not allowed to upload UT marks for ${subject} for ${batchDocs[i].batch} batch.`
     );
   }

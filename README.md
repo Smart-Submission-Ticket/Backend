@@ -132,6 +132,55 @@
    - Response headers:
      - `x-auth-token`: "jwt-token for teacher authentication"
 
+### Admin Registration
+
+1. `POST /register/admin`
+
+- Request Headers:
+
+  - `x-auth-token`: "jwt-token for admin authentication"
+
+- Request Body:
+
+  ```json
+  {
+    "email": "admin@mail.com",
+    "password": "password"
+  }
+  ```
+
+- Response:
+
+  ```json
+  {
+    "message": "Admin registered successfully"
+  }
+  ```
+
+2. `DELETE /register/admin`
+
+- Will delete the admin account.
+
+- Request Headers:
+
+  - `x-auth-token`: "jwt-token for admin authentication"
+
+- Request Body:
+
+  ```json
+  {
+    "email": "admin@mail.com"
+  }
+  ```
+
+- Response:
+
+  ```json
+  {
+    "message": "Admin deleted successfully"
+  }
+  ```
+
 ### Login
 
 1 `POST /login`

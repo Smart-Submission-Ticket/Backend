@@ -3,6 +3,7 @@ require("express-async-errors");
 
 const registerStudent = require("../routes/register_student");
 const registerTeacher = require("../routes/register_teacher");
+const registerAdmin = require("../routes/register_admin");
 const login = require("../routes/login");
 const fetch = require("../routes/fetch");
 const submit = require("../routes/submit");
@@ -19,11 +20,12 @@ module.exports = function (app) {
   app.use(express.urlencoded({ extended: true }));
   app.use("/register/student", registerStudent);
   app.use("/register/teacher", registerTeacher);
+  app.use("/register/admin", admin, registerAdmin);
   app.use("/login", login);
-  app.use("/fetch", teacher, admin, fetch);
-  app.use("/submit", teacher, submit);
+  app.use("/fetch", admin, fetch);
+  app.use("/submit", submit);
   app.use("/classes", classes);
   app.use("/records", records);
-  app.use("/records/update", teacher, recordsUpdate);
+  app.use("/records/update", recordsUpdate);
   app.use(error);
 };

@@ -3,6 +3,7 @@ const assert = require("assert");
 
 const { TicketData } = require("../models/ticket_data");
 const admin = require("../middleware/admin");
+const teacher = require("../middleware/teacher");
 const upload = require("../middleware/files");
 const readExcel = require("../utils/read_excel");
 const {
@@ -114,17 +115,22 @@ router.post("/honors", admin, upload.single("file"), async (req, res) => {
   res.send({ message: "Honors updated." });
 });
 
-router.post("/assignments", upload.single("file"), async (req, res) => {
-  const { subject } = req.body;
-  assert(subject, "ERROR 400: Subject is required.");
+router.post(
+  "/assignments",
+  teacher,
+  upload.single("file"),
+  async (req, res) => {
+    const { subject } = req.body;
+    assert(subject, "ERROR 400: Subject is required.");
 
-  const assignments = readExcel(req.file.buffer);
-  await uploadAssignmentsData(subject, assignments, req.user);
-  logs(req, `Assignments updated for ${subject}.`);
-  res.send({ message: "Assignments updated." });
-});
+    const assignments = readExcel(req.file.buffer);
+    await uploadAssignmentsData(subject, assignments, req.user);
+    logs(req, `Assignments updated for ${subject}.`);
+    res.send({ message: "Assignments updated." });
+  }
+);
 
-router.post("/utmarks", upload.single("file"), async (req, res) => {
+router.post("/utmarks", teacher, upload.single("file"), async (req, res) => {
   const { subject } = req.body;
   assert(subject, "ERROR 400: Subject is required.");
 
