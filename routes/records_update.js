@@ -8,7 +8,7 @@ const { StudentRecord } = require("../models/student_record");
 const { Batch } = require("../models/batch");
 const {
   updateAttendanceSpreadSheetValues,
-} = require("../utils/google_sheets_service");
+} = require("../utils/google_sheets/update_data");
 const logs = require("../utils/logs");
 
 const router = express.Router();

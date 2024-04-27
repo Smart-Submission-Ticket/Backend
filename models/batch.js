@@ -28,9 +28,13 @@ const batchSchema = new mongoose.Schema({
   ],
   theory: [
     {
+      _id: false,
       title: {
         type: String,
         required: true,
+      },
+      elective: {
+        type: String,
       },
       teacher: {
         type: String,
@@ -40,9 +44,13 @@ const batchSchema = new mongoose.Schema({
   ],
   practical: [
     {
+      _id: false,
       title: {
         type: String,
         required: true,
+      },
+      elective: {
+        type: String,
       },
       noOfAssignments: {
         type: Number,

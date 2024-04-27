@@ -136,6 +136,8 @@ const uploadCurriculumData = async (curriculum) => {
   curriculum.theory = trimNestedArray(curriculum.theory);
   curriculum.practical = trimNestedArray(curriculum.practical);
 
+  const [theory, practical] = [curriculum.theory, curriculum.practical];
+
   const [classes, studentDatas, batchDocs, teachers] = await Promise.all([
     Classes.find(),
     StudentData.find(),
@@ -143,82 +145,102 @@ const uploadCurriculumData = async (curriculum) => {
     Teacher.find(),
   ]);
 
-  const [theory, practical] = [curriculum.theory, curriculum.practical];
-
   const teacherEmails = teachers.map((t) => t.email);
   const newTeachers = [];
 
   const theorySubjects = {};
 
-  let nextYearSubjectIndex = 0;
+  let classes_ = [];
+  let elective = "";
+
   for (let i = 0; i < theory.length; i++) {
+    // Update year and classes
     if (theory[i][0] !== "") {
-      nextYearSubjectIndex = i;
+      classes_ = theory[i].slice(3);
+      elective = "";
+      continue;
     }
 
-    const class_ = theory[i][1];
+    // Update elective
+    if (theory[i][1] !== "" && theory[i][2] !== "") {
+      elective = theory[i][1];
+    }
 
-    const classDoc = classes.find((c) => c.class === class_);
-    if (!classDoc) continue;
+    // Update theory subjects
+    for (let j = 3; j < theory[i].length; j++) {
+      const subject = elective ? theory[i][2] : theory[i][1];
+      if (subject === "") continue;
 
-    const batches = classDoc.batches;
+      const class_ = classes.find((c) => c.class === classes_[j - 3]);
+      if (!class_) continue;
 
-    for (let j = 2; j < theory[i].length; j++) {
-      const teacherEmail = theory[i][j];
-
-      if (teacherEmail === "") continue;
-
-      if (!teacherEmails.includes(teacherEmail)) {
-        newTeachers.push({
-          email: teacherEmail,
-        });
-      }
-
-      batches.forEach((batch) => {
+      class_.batches.forEach((batch) => {
         if (theorySubjects[batch] === undefined) {
           theorySubjects[batch] = [];
         }
 
+        const teacher = theory[i][j];
+        if (teacher === "") return;
+
         theorySubjects[batch].push({
-          title: theory[nextYearSubjectIndex][j],
-          teacher: teacherEmail,
+          title: subject,
+          ...(elective && { elective }),
+          teacher,
         });
+
+        if (!teacherEmails.includes(teacher)) {
+          newTeachers.push({
+            email: teacher,
+          });
+        }
       });
     }
   }
 
   const practicalSubjects = {};
 
-  let nextYearPracticalIndex = 0;
+  elective = "";
+  let batches_ = [];
+
   for (let i = 0; i < practical.length; i++) {
+    // Update year and elective
     if (practical[i][0] !== "") {
-      nextYearPracticalIndex = i;
+      elective = "";
+      batches_ = practical[i].slice(2);
+      continue;
     }
 
-    const batch = practical[i][1];
+    // Update elective
+    if (practical[i][1] !== "" && practical[i][2] !== "") {
+      elective = practical[i][1];
+    }
 
-    if (!classes.find((c) => c.batches.includes(batch))) continue;
+    // Update practical subjects
+    for (let j = 4; j < practical[i].length; j++) {
+      const subject = elective ? practical[i][2] : practical[i][1];
+      if (subject === "") continue;
 
-    for (let j = 2; j < practical[i].length; j++) {
-      const teacherEmail = practical[i][j];
-
-      if (teacherEmail === "") continue;
-
-      if (!teacherEmails.includes(teacherEmail)) {
-        newTeachers.push({
-          email: teacherEmail,
-        });
-      }
+      const batch = batches_[j - 2];
+      if (!classes.find((c) => c.batches.includes(batch))) continue;
 
       if (practicalSubjects[batch] === undefined) {
         practicalSubjects[batch] = [];
       }
 
+      const teacher = practical[i][j];
+      if (teacher === "") continue;
+
       practicalSubjects[batch].push({
-        title: practical[nextYearPracticalIndex][j],
-        noOfAssignments: practical[nextYearPracticalIndex + 1][j],
-        teacher: teacherEmail,
+        title: subject,
+        noOfAssignments: practical[i][3],
+        teacher,
       });
+
+      if (!teacherEmails.includes(teacher)) {
+        newTeachers.push({
+          email: teacher,
+        });
+      }
     }
   }
 
