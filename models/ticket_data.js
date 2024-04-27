@@ -4,6 +4,9 @@ const ticketDataSchema = new mongoose.Schema({
   academicYear: {
     type: String,
   },
+  semester: {
+    type: String,
+  },
   attendanceLabAsst: {
     type: String,
   },

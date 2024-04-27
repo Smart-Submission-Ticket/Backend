@@ -9,7 +9,7 @@ const {
   BE_PROJECTS_SHEET_ID,
   HONORS_SHEET_ID,
 } = require("../../config");
-const { updateSpreadSheetValues } = require("./services");
+const { updateSpreadSheetValues } = require("../google_apis/sheets_services");
 
 function _convertToMajorDimensionRows(values) {
   const rows = [];

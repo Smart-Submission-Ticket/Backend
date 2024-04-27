@@ -10,8 +10,8 @@ const submit = require("../routes/submit");
 const classes = require("../routes/classes");
 const records = require("../routes/records");
 const recordsUpdate = require("../routes/records_update");
+const generate = require("../routes/generate");
 
-const teacher = require("../middleware/teacher");
 const admin = require("../middleware/admin");
 const error = require("../middleware/error");
 
@@ -27,5 +27,6 @@ module.exports = function (app) {
   app.use("/classes", classes);
   app.use("/records", records);
   app.use("/records/update", recordsUpdate);
+  app.use("/generate", admin, generate);
   app.use(error);
 };

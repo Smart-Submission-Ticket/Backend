@@ -1,5 +1,7 @@
 const { ATTENDANCE_SHEET_ID } = require("../../config");
-const { updateSpreadSheetValuesBatch } = require("./services");
+const {
+  updateSpreadSheetValuesBatch,
+} = require("../google_apis/sheets_services");
 const { getAttendanceSpreadSheetValues } = require("./get_data");
 
 async function updateAttendanceSpreadSheetValues(attendance) {

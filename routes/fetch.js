@@ -10,7 +10,7 @@ const {
   getTESeminarsSpreadSheetValues,
   getBEProjectsSpreadSheetValues,
   getHonorsSpreadSheetValues,
-} = require("../utils/google_sheets/get_data");
+} = require("../utils/sheets/get_data");
 
 const {
   uploadClassesData,

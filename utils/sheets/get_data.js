@@ -9,7 +9,7 @@ const {
   BE_PROJECTS_SHEET_ID,
   HONORS_SHEET_ID,
 } = require("../../config");
-const { getSpreadSheetValues } = require("./services");
+const { getSpreadSheetValues } = require("../google_apis/sheets_services");
 
 async function getStudentsSpreadSheetValues() {
   const res = await getSpreadSheetValues(STUDENTS_SHEET_ID);

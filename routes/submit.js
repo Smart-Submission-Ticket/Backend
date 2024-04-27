@@ -32,7 +32,7 @@ const {
   uploadTESeminarsDataToSpreadSheet,
   uploadBEProjectsDataToSpreadSheet,
   uploadHonorsDataToSpreadSheet,
-} = require("../utils/google_sheets/upload_data");
+} = require("../utils/sheets/upload_data");
 
 const router = express.Router();
 
