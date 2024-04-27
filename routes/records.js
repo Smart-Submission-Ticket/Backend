@@ -69,12 +69,14 @@ router.get("/", auth, async (req, res) => {
       theory: batch.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batch.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
@@ -131,12 +133,14 @@ router.get("/rollNo/:rollNo", teacher, async (req, res) => {
       theory: batch.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batch.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
@@ -190,12 +194,14 @@ router.get("/batch/:batch", teacher, async (req, res) => {
       theory: batchDoc.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batchDoc.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
@@ -285,12 +291,14 @@ router.get("/class/:class", teacher, async (req, res) => {
         theory: batchDoc.theory.map((theory) => {
           return {
             title: theory.title,
+            elective: theory.elective,
             teacher: theory.teacher,
           };
         }),
         practical: batchDoc.practical.map((practical) => {
           return {
             title: practical.title,
+            elective: practical.elective,
             noOfAssignments: practical.noOfAssignments,
             teacher: practical.teacher,
           };
@@ -380,12 +388,14 @@ router.get("/batch/:batch/subject/:subject", teacher, async (req, res) => {
       theory: batchDoc.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batchDoc.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
@@ -491,12 +501,14 @@ router.get("/class/:class/subject/:subject", teacher, async (req, res) => {
         theory: batchDoc.theory.map((theory) => {
           return {
             title: theory.title,
+            elective: theory.elective,
             teacher: theory.teacher,
           };
         }),
         practical: batchDoc.practical.map((practical) => {
           return {
             title: practical.title,
+            elective: practical.elective,
             noOfAssignments: practical.noOfAssignments,
             teacher: practical.teacher,
           };

@@ -232,6 +232,7 @@ const uploadCurriculumData = async (curriculum) => {
 
       practicalSubjects[batch].push({
         title: subject,
+        ...(elective && { elective }),
         noOfAssignments: practical[i][3],
         teacher,
       });
@@ -349,7 +350,7 @@ const uploadAttendanceData = async (attendance) => {
   ]);
 };
 
-const uploadAssignmentsData = async (subject, assignments, user) => {
+const uploadAssignmentsData = async (subject, assignments, user, role) => {
   subject = subject.trim();
   assignments = trimNestedArray(assignments);
 
@@ -374,7 +375,7 @@ const uploadAssignmentsData = async (subject, assignments, user) => {
     );
 
     assert(
-      user.role === "admin" ||
+      role === "admin" ||
         batchDocs[i].practical.find(
           (p) => p.title.toLowerCase() === subject.toLowerCase()
         ).teacher === user.email,
@@ -463,7 +464,7 @@ const uploadAssignmentsData = async (subject, assignments, user) => {
   ]);
 };
 
-const uploadUTMarksData = async (subject, utMarks, user) => {
+const uploadUTMarksData = async (subject, utMarks, user, role) => {
   subject = subject.trim();
   utMarks = trimNestedArray(utMarks);
 
@@ -488,7 +489,7 @@ const uploadUTMarksData = async (subject, utMarks, user) => {
     );
 
     assert(
-      user.role === "admin" ||
+      role === "admin" ||
         batchDocs[i].theory.find(
           (t) => t.title.toLowerCase() === subject.toLowerCase()
         ).teacher === user.email,
