@@ -5,6 +5,25 @@ const { GOOGLE_DRIVE_FOLDER_ID } = require("../../config");
 
 const drive = google.drive("v3");
 
+async function checkIfSpreadSheetExists(spreadsheet, folderId) {
+  const auth = await getAuthToken();
+
+  const queries = [
+    `name = '${spreadsheet}'`,
+    "mimeType = 'application/vnd.google-apps.spreadsheet'",
+    "trashed = false",
+    `'${folderId}' in parents`,
+  ];
+
+  const sheetExists = await drive.files.list({
+    auth,
+    q: queries.join(" and "),
+    fields: "files(id)",
+  });
+
+  return sheetExists.data.files.length > 0;
+}
+
 async function createFolderIfNotExists(folderName) {
   const auth = await getAuthToken();
 
@@ -56,6 +75,7 @@ async function createSheetInFolder(title, folderId) {
 }
 
 module.exports = {
+  checkIfSpreadSheetExists,
   createFolderIfNotExists,
   createSheetInFolder,
 };

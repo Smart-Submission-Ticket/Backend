@@ -30,6 +30,12 @@ const studentRecordSchema = new mongoose.Schema({
       ut2Alternate: {
         type: Boolean,
       },
+      ut1Absent: {
+        type: Boolean,
+      },
+      ut2Absent: {
+        type: Boolean,
+      },
     },
   },
   assignments: {

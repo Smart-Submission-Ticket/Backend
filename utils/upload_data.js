@@ -505,10 +505,22 @@ const uploadUTMarksData = async (subject, utMarks, user, role) => {
 
     const _utMarks = [];
     const _utMarksAlternate = [];
+    const _utAbsent = [];
 
     for (let j = 1; j < utMarks.length; j++) {
       let utMark = utMarks[j][i + 1];
-      if (!utMark || utMark === "") utMark = 0;
+      if (
+        !utMark ||
+        utMark === "" ||
+        utMark.toLowerCase() === "a" ||
+        utMark.toLowerCase() === "absent"
+      ) {
+        utMark = 0;
+        _utAbsent.push(true);
+      } else {
+        _utAbsent.push(false);
+      }
+
       _utMarks.push(utMark);
       _utMarksAlternate.push(isValidUTMarks(utMarks[j][i + 1]));
     }
@@ -517,6 +529,7 @@ const uploadUTMarksData = async (subject, utMarks, user, role) => {
       rollNo,
       utMarks: _utMarks,
       utMarksAlternate: _utMarksAlternate,
+      utAbsent: _utAbsent,
     });
   }
 
@@ -536,6 +549,8 @@ const uploadUTMarksData = async (subject, utMarks, user, role) => {
         ut2: newUTMarks[i].utMarks[1],
         ut1Alternate: newUTMarks[i].utMarksAlternate[0],
         ut2Alternate: newUTMarks[i].utMarksAlternate[1],
+        ut1Absent: newUTMarks[i].utAbsent[0],
+        ut2Absent: newUTMarks[i].utAbsent[1],
       };
 
       newUTMarksMap.set(subject, newUTRecord);
@@ -553,6 +568,8 @@ const uploadUTMarksData = async (subject, utMarks, user, role) => {
               ut2: newUTMarks[i].utMarks[1],
               ut1Alternate: newUTMarks[i].utMarksAlternate[0],
               ut2Alternate: newUTMarks[i].utMarksAlternate[1],
+              ut1Absent: newUTMarks[i].utAbsent[0],
+              ut2Absent: newUTMarks[i].utAbsent[1],
             },
           ],
         ]),

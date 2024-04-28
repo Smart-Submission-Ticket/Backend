@@ -4,6 +4,7 @@ const assert = require("assert");
 const { Sheet } = require("../models/sheet");
 const { TicketData } = require("../models/ticket_data");
 const {
+  checkIfSpreadSheetExists,
   createFolderIfNotExists,
   createSheetInFolder,
 } = require("../utils/google_apis/drive_services");
@@ -64,6 +65,19 @@ router.post("/master/ut", async (req, res) => {
         sheetId = sheet.data.id;
       } else {
         sheetId = sheetExists.spreadsheetId;
+        const exists = await checkIfSpreadSheetExists(title, folder.data.id);
+        if (!exists) {
+          sheetId = await createSheetInFolder(title, folder.data.id);
+          await Sheet.updateOne(
+            { title },
+            {
+              spreadsheetId: sheetId.data.id,
+              parentFolderId: folder.data.id,
+            }
+          );
+
+          sheetId = sheetId.data.id;
+        }
       }
 
       generateMasterUtSheet(year, sheetId);
@@ -72,7 +86,10 @@ router.post("/master/ut", async (req, res) => {
 
   const createSheets = await Sheet.find({
     title: {
-      $regex: `^${academicYear} SEM ${semester} IT Unit Test 1 & 2 Reports`,
+      $in: years.map(
+        (year) =>
+          `${academicYear} SEM ${semester} IT Unit Test 1 & 2 Reports ${yearToEngg[year]}`
+      ),
     },
   }).select("-_id -__v -parentFolderId");
 
