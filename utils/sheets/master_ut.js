@@ -13,6 +13,7 @@ const {
   textFormatRequest,
   bordersRequest,
   updateDimensionsRequest,
+  updateBordersRequest,
 } = require("../google_apis/sheets_helpers");
 const {
   updateSpreadSheet,
@@ -21,38 +22,8 @@ const {
   getSpreadSheet,
 } = require("../google_apis/sheets_services");
 const { deleteSheet } = require("../google_apis/sheets_helpers");
+const { isValidUTMarks } = require("../valid_records");
 
-/*
-Will return an object with all the data required to
-generate the master UT sheet for a particular class
-The data will be in the following format:
-{
-  class_: "TE 09",
-  academicYear: "2020-21",
-  semester: "I",
-  rollNos: ["33167", "33168", ...],
-  names: ["Name1", "Name2", ...],
-  subjects: [
-    {
-      title: "Subject1",
-      teacher: "ABC",
-    },
-    ...
-  ],
-  unitTests: {
-    "33167": {
-      "Subject1": {
-        ut1: "10",
-        ut1Absent: false,
-        ut2: "20",
-        ut2Absent: false,
-      },
-      ...
-    },
-    ...
-  },
-}
-*/
 const gatherData = async (year, class_) => {
   const data = {};
 
@@ -119,10 +90,6 @@ const gatherData = async (year, class_) => {
   return data;
 };
 
-/*
-Will process the data and generate as 
-it should be entered in the master UT sheet
-*/
 const processData = (data) => {
   const rollNosNamesAndUt1Marks = [];
   const rollNosNamesAndUt2Marks = [];
@@ -151,22 +118,128 @@ const processData = (data) => {
   const totalUt2Marks = Array(sortedRollNos.length).fill(0);
   const totalMarks = Array(sortedRollNos.length).fill(0);
 
+  const stats = {
+    ut1: {
+      absent: {},
+      appeared: {},
+      passed: {},
+      failed: {},
+      total: {},
+      average: {},
+    },
+    ut2: {
+      absent: {},
+      appeared: {},
+      passed: {},
+      failed: {},
+      total: {},
+      average: {},
+    },
+    totalUt1Average: 0,
+    totalUt2Average: 0,
+    ut1Ranges: {
+      _0: {},
+      _0_11: {},
+      _12_17: {},
+      _18_22: {},
+      _23_30: {},
+    },
+    ut2Ranges: {
+      _0: {},
+      _0_11: {},
+      _12_17: {},
+      _18_22: {},
+      _23_30: {},
+    },
+  };
+
   data.subjects.forEach((subject) => {
     subjects.push(`${subject.title}\n(${subject.teacher})`);
     const ut1Marks = [];
     const ut2Marks = [];
+
+    if (!stats.ut1.absent[subject.title]) {
+      stats.ut1.absent[subject.title] = 0;
+      stats.ut1.appeared[subject.title] = 0;
+      stats.ut1.passed[subject.title] = 0;
+      stats.ut1.failed[subject.title] = 0;
+      stats.ut1.total[subject.title] = 0;
+      stats.ut1.average[subject.title] = 0;
+
+      stats.ut1Ranges._0[subject.title] = 0;
+      stats.ut1Ranges._0_11[subject.title] = 0;
+      stats.ut1Ranges._12_17[subject.title] = 0;
+      stats.ut1Ranges._18_22[subject.title] = 0;
+      stats.ut1Ranges._23_30[subject.title] = 0;
+    }
+
+    if (!stats.ut2.absent[subject.title]) {
+      stats.ut2.absent[subject.title] = 0;
+      stats.ut2.appeared[subject.title] = 0;
+      stats.ut2.passed[subject.title] = 0;
+      stats.ut2.failed[subject.title] = 0;
+      stats.ut2.total[subject.title] = 0;
+      stats.ut2.average[subject.title] = 0;
+
+      stats.ut2Ranges._0[subject.title] = 0;
+      stats.ut2Ranges._0_11[subject.title] = 0;
+      stats.ut2Ranges._12_17[subject.title] = 0;
+      stats.ut2Ranges._18_22[subject.title] = 0;
+      stats.ut2Ranges._23_30[subject.title] = 0;
+    }
+
     sortedRollNos.forEach((rollNo) => {
       if (data.unitTests[rollNo][subject.title]) {
         if (data.unitTests[rollNo][subject.title].ut1Absent) {
           ut1Marks.push("A");
+          stats.ut1.absent[subject.title] += 1;
         } else {
           ut1Marks.push(data.unitTests[rollNo][subject.title].ut1);
+          stats.ut1.appeared[subject.title] += 1;
+
+          if (isValidUTMarks(data.unitTests[rollNo][subject.title].ut1)) {
+            stats.ut1.passed[subject.title] += 1;
+          } else {
+            stats.ut1.failed[subject.title] += 1;
+          }
+
+          if (data.unitTests[rollNo][subject.title].ut1 === 0) {
+            stats.ut1Ranges._0[subject.title] += 1;
+          } else if (data.unitTests[rollNo][subject.title].ut1 <= 11) {
+            stats.ut1Ranges._0_11[subject.title] += 1;
+          } else if (data.unitTests[rollNo][subject.title].ut1 <= 17) {
+            stats.ut1Ranges._12_17[subject.title] += 1;
+          } else if (data.unitTests[rollNo][subject.title].ut1 <= 22) {
+            stats.ut1Ranges._18_22[subject.title] += 1;
+          } else {
+            stats.ut1Ranges._23_30[subject.title] += 1;
+          }
         }
 
         if (data.unitTests[rollNo][subject.title].ut2Absent) {
           ut2Marks.push("A");
+          stats.ut2.absent[subject.title] += 1;
         } else {
           ut2Marks.push(data.unitTests[rollNo][subject.title].ut2);
+          stats.ut2.appeared[subject.title] += 1;
+
+          if (isValidUTMarks(data.unitTests[rollNo][subject.title].ut2)) {
+            stats.ut2.passed[subject.title] += 1;
+          } else {
+            stats.ut2.failed[subject.title] += 1;
+          }
+
+          if (data.unitTests[rollNo][subject.title].ut2 === 0) {
+            stats.ut2Ranges._0[subject.title] += 1;
+          } else if (data.unitTests[rollNo][subject.title].ut2 <= 11) {
+            stats.ut2Ranges._0_11[subject.title] += 1;
+          } else if (data.unitTests[rollNo][subject.title].ut2 <= 17) {
+            stats.ut2Ranges._12_17[subject.title] += 1;
+          } else if (data.unitTests[rollNo][subject.title].ut2 <= 22) {
+            stats.ut2Ranges._18_22[subject.title] += 1;
+          } else {
+            stats.ut2Ranges._23_30[subject.title] += 1;
+          }
         }
 
         totalUt1Marks[sortedRollNos.indexOf(rollNo)] +=
@@ -199,11 +272,61 @@ const processData = (data) => {
 
   rollNosNamesAndUt2Marks.push(totalTermwork);
 
-  return { rollNosNamesAndUt1Marks, rollNosNamesAndUt2Marks };
+  // Calculate stats
+  for (const subject in stats.ut1.total) {
+    // total = appeared + absent
+    stats.ut1.total[subject] =
+      stats.ut1.appeared[subject] + stats.ut1.absent[subject];
+
+    // average = passed / appeared * 100
+    stats.ut1.average[subject] = parseFloat(
+      ((stats.ut1.passed[subject] / stats.ut1.appeared[subject]) * 100).toFixed(
+        2
+      )
+    );
+
+    // total = appeared + absent
+    stats.ut2.total[subject] =
+      stats.ut2.appeared[subject] + stats.ut2.absent[subject];
+
+    // average = passed / appeared * 100
+    stats.ut2.average[subject] = parseFloat(
+      ((stats.ut2.passed[subject] / stats.ut2.appeared[subject]) * 100).toFixed(
+        2
+      )
+    );
+  }
+
+  // Calculate total average
+  // Average of averages
+  stats.totalUt1Average = parseFloat(
+    (
+      Object.values(stats.ut1.average).reduce((acc, curr) => acc + curr, 0) /
+      Object.values(stats.ut1.average).length
+    ).toFixed(2)
+  );
+
+  stats.totalUt2Average = parseFloat(
+    (
+      Object.values(stats.ut2.average).reduce((acc, curr) => acc + curr, 0) /
+      Object.values(stats.ut2.average).length
+    ).toFixed(2)
+  );
+
+  data.rollNosNamesAndUt1Marks = rollNosNamesAndUt1Marks;
+  data.rollNosNamesAndUt2Marks = rollNosNamesAndUt2Marks;
+  data.stats = stats;
+
+  return data;
 };
 
-const createHeader = async (spreadsheetId, sheetId, sheetName, data, width) => {
+const createHeader = async (spreadsheetId, sheetId, sheetName, data) => {
+  const width = data.rollNosNamesAndUt1Marks.length - 1;
+
   const requests = [
+    // Make width of the first 200 rows 50
+    updateDimensionsRequest(sheetId, 0, data.rollNos.length + 35, 30, "ROWS"),
+
     // Merge cells
     mergeCellsRequest(sheetId, 0, 1, 0, width), // UT1 - PICT
     mergeCellsRequest(sheetId, 0, 1, width, width * 2), // UT2 - PICT
@@ -352,13 +475,9 @@ const createHeader = async (spreadsheetId, sheetId, sheetName, data, width) => {
   await updateSpreadSheetValuesBatch(spreadsheetId, values);
 };
 
-const createSubjectHeader = async (
-  spreadsheetId,
-  sheetId,
-  sheetName,
-  data,
-  width
-) => {
+const createSubjectHeader = async (spreadsheetId, sheetId, sheetName, data) => {
+  const width = data.rollNosNamesAndUt1Marks.length - 1;
+
   const requests = [
     // Merge cells
     // UT1
@@ -609,25 +728,18 @@ const createSubjectHeader = async (
   await updateSpreadSheetValuesBatch(spreadsheetId, values);
 };
 
-const createSubjectMarks = async (
-  spreadsheetId,
-  sheetId,
-  sheetName,
-  rollNosNamesAndUt1Marks,
-  rollNosNamesAndUt2Marks,
-  minUTMarksRequired
-) => {
-  const width = rollNosNamesAndUt1Marks.length - 1;
+const createSubjectMarks = async (spreadsheetId, sheetId, sheetName, data) => {
+  const width = data.rollNosNamesAndUt1Marks.length - 1;
 
   const values = [];
   // Transform column-wise data to row-wise data
-  for (let i = 0; i < rollNosNamesAndUt1Marks[0].length; i++) {
+  for (let i = 0; i < data.rollNosNamesAndUt1Marks[0].length; i++) {
     const row = [];
-    for (let j = 0; j < rollNosNamesAndUt1Marks.length - 1; j++) {
-      row.push(rollNosNamesAndUt1Marks[j][i]);
+    for (let j = 0; j < data.rollNosNamesAndUt1Marks.length - 1; j++) {
+      row.push(data.rollNosNamesAndUt1Marks[j][i]);
     }
-    for (let j = 0; j < rollNosNamesAndUt2Marks.length; j++) {
-      row.push(rollNosNamesAndUt2Marks[j][i]);
+    for (let j = 0; j < data.rollNosNamesAndUt2Marks.length; j++) {
+      row.push(data.rollNosNamesAndUt2Marks[j][i]);
     }
     values.push(row);
   }
@@ -640,7 +752,7 @@ const createSubjectMarks = async (
     repeatCellRequest(
       sheetId,
       7,
-      rollNosNamesAndUt1Marks[0].length + 7,
+      data.rollNosNamesAndUt1Marks[0].length + 7,
       0,
       width * 2 + 2,
       {
@@ -658,7 +770,7 @@ const createSubjectMarks = async (
             {
               sheetId,
               startRowIndex: 7,
-              endRowIndex: rollNosNamesAndUt1Marks[0].length + 7,
+              endRowIndex: data.rollNosNamesAndUt1Marks[0].length + 7,
               startColumnIndex: 0,
               endColumnIndex: width * 2,
             },
@@ -687,7 +799,7 @@ const createSubjectMarks = async (
             {
               sheetId,
               startRowIndex: 7,
-              endRowIndex: rollNosNamesAndUt1Marks[0].length + 7,
+              endRowIndex: data.rollNosNamesAndUt1Marks[0].length + 7,
               startColumnIndex: 2,
               endColumnIndex: width - 1,
             },
@@ -695,7 +807,9 @@ const createSubjectMarks = async (
           booleanRule: {
             condition: {
               type: "NUMBER_LESS",
-              values: [{ userEnteredValue: minUTMarksRequired.toString() }],
+              values: [
+                { userEnteredValue: data.minUTMarksRequired.toString() },
+              ],
             },
             format: {
               backgroundColor: { red: 1.0, green: 1.0, blue: 0.0 },
@@ -713,7 +827,7 @@ const createSubjectMarks = async (
             {
               sheetId,
               startRowIndex: 7,
-              endRowIndex: rollNosNamesAndUt1Marks[0].length + 7,
+              endRowIndex: data.rollNosNamesAndUt1Marks[0].length + 7,
               startColumnIndex: width + 2,
               endColumnIndex: width * 2 - 1,
             },
@@ -721,7 +835,9 @@ const createSubjectMarks = async (
           booleanRule: {
             condition: {
               type: "NUMBER_LESS",
-              values: [{ userEnteredValue: minUTMarksRequired.toString() }],
+              values: [
+                { userEnteredValue: data.minUTMarksRequired.toString() },
+              ],
             },
             format: {
               backgroundColor: { red: 1.0, green: 1.0, blue: 0.0 },
@@ -736,7 +852,7 @@ const createSubjectMarks = async (
     repeatCellRequest(
       sheetId,
       7,
-      rollNosNamesAndUt1Marks[0].length + 7,
+      data.rollNosNamesAndUt1Marks[0].length + 7,
       width - 1,
       width,
       {
@@ -747,7 +863,7 @@ const createSubjectMarks = async (
     repeatCellRequest(
       sheetId,
       7,
-      rollNosNamesAndUt1Marks[0].length + 7,
+      data.rollNosNamesAndUt1Marks[0].length + 7,
       width * 2 - 1,
       width * 2 + 2,
       {
@@ -756,8 +872,8 @@ const createSubjectMarks = async (
     ),
 
     // Make name column width 200
-    updateDimensionsRequest(sheetId, 1, 2, 350),
-    updateDimensionsRequest(sheetId, width + 1, width + 2, 350),
+    updateDimensionsRequest(sheetId, 1, 2, 325),
+    updateDimensionsRequest(sheetId, width + 1, width + 2, 325),
 
     // Make text alignment to left for name column
     {
@@ -765,7 +881,7 @@ const createSubjectMarks = async (
         range: {
           sheetId,
           startRowIndex: 7,
-          endRowIndex: rollNosNamesAndUt1Marks[0].length + 7,
+          endRowIndex: data.rollNosNamesAndUt1Marks[0].length + 7,
           startColumnIndex: 1,
           endColumnIndex: 2,
         },
@@ -787,7 +903,7 @@ const createSubjectMarks = async (
         range: {
           sheetId,
           startRowIndex: 7,
-          endRowIndex: rollNosNamesAndUt1Marks[0].length + 7,
+          endRowIndex: data.rollNosNamesAndUt1Marks[0].length + 7,
           startColumnIndex: width + 1,
           endColumnIndex: width + 2,
         },
@@ -808,18 +924,855 @@ const createSubjectMarks = async (
   await updateSpreadSheet(spreadsheetId, requests);
 };
 
+const createSubjectStats = async (spreadsheetId, sheetId, sheetName, data) => {
+  const width = data.rollNosNamesAndUt1Marks.length - 1;
+  const height = data.rollNosNamesAndUt1Marks[0].length + 7;
+
+  // Insert the stats at the end of the sheet in rectangular form
+
+  const statsHeight = 7;
+  const totalAverageHeight = 1;
+  const noteHeight = 3;
+  const rangesHeight = 8;
+
+  const statsOffset = 2;
+  const totalAverageOffset = statsOffset + statsHeight + 2;
+  const noteOffset = totalAverageOffset + totalAverageHeight + 2;
+  const rangesOffset = noteOffset + noteHeight + 2;
+
+  const requests = [
+    // Stats
+    updateBordersRequest(
+      sheetId,
+      height + statsOffset,
+      height + statsOffset + statsHeight,
+      1,
+      data.subjects.length + 2,
+      2,
+      2,
+      2,
+      2
+    ),
+
+    updateBordersRequest(
+      sheetId,
+      height + statsOffset,
+      height + statsOffset + statsHeight,
+      width + 1,
+      width + data.subjects.length + 2,
+      2,
+      2,
+      2,
+      2
+    ),
+
+    // Total average
+    updateBordersRequest(
+      sheetId,
+      height + totalAverageOffset,
+      height + totalAverageOffset + totalAverageHeight,
+      1,
+      3,
+      2,
+      2,
+      2,
+      2
+    ),
+    updateBordersRequest(
+      sheetId,
+      height + totalAverageOffset,
+      height + totalAverageOffset + totalAverageHeight,
+      width + 1,
+      width + 3,
+      2,
+      2,
+      2,
+      2
+    ),
+
+    // Note
+    updateBordersRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + noteHeight,
+      1,
+      data.subjects.length + 2,
+      2,
+      2,
+      2,
+      2
+    ),
+
+    updateBordersRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + noteHeight,
+      width + 1,
+      width + data.subjects.length + 2,
+      2,
+      2,
+      2,
+      2
+    ),
+
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + noteHeight,
+      1,
+      2
+    ),
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + noteHeight,
+      width + 1,
+      width + 2
+    ),
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + 1,
+      2,
+      data.subjects.length + 2
+    ),
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + 1,
+      width + 2,
+      width + data.subjects.length + 2
+    ),
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset + 1,
+      height + noteOffset + 2,
+      3,
+      data.subjects.length + 2
+    ),
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset + 1,
+      height + noteOffset + 2,
+      width + 3,
+      width + data.subjects.length + 2
+    ),
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset + 2,
+      height + noteOffset + noteHeight,
+      3,
+      data.subjects.length + 2
+    ),
+    mergeCellsRequest(
+      sheetId,
+      height + noteOffset + 2,
+      height + noteOffset + noteHeight,
+      width + 3,
+      width + data.subjects.length + 2
+    ),
+
+    // Ranges
+    updateBordersRequest(
+      sheetId,
+      height + rangesOffset,
+      height + rangesOffset + rangesHeight,
+      1,
+      data.subjects.length + 2,
+      2,
+      2,
+      2,
+      2
+    ),
+
+    updateBordersRequest(
+      sheetId,
+      height + rangesOffset,
+      height + rangesOffset + rangesHeight,
+      width + 1,
+      width + data.subjects.length + 2,
+      2,
+      2,
+      2,
+      2
+    ),
+
+    // Stats
+    // Make the total cell font size 12
+    repeatCellRequest(
+      sheetId,
+      height + statsOffset,
+      height + statsOffset + statsHeight,
+      0,
+      width * 2,
+      {
+        textFormat: textFormatRequest({ fontSize: 12 }),
+      }
+    ),
+
+    // Make subject names red and bold
+    repeatCellRequest(
+      sheetId,
+      height + statsOffset,
+      height + statsOffset + 1,
+      0,
+      width * 2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+          foregroundColor: { red: 1.0, green: 0.0, blue: 0.0 },
+        }),
+      }
+    ),
+
+    // Make headers bold
+    repeatCellRequest(
+      sheetId,
+      height + statsOffset + 1,
+      height + statsOffset + statsHeight,
+      1,
+      2,
+      {
+        textFormat: textFormatRequest({ fontSize: 12, bold: true }),
+      }
+    ),
+
+    repeatCellRequest(
+      sheetId,
+      height + statsOffset + 1,
+      height + statsOffset + statsHeight,
+      width + 1,
+      width + 2,
+      {
+        textFormat: textFormatRequest({ fontSize: 12, bold: true }),
+      }
+    ),
+
+    // Total average
+    repeatCellRequest(
+      sheetId,
+      height + totalAverageOffset,
+      height + totalAverageOffset + totalAverageHeight,
+      0,
+      width * 2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 14,
+          bold: true,
+          foregroundColor: { red: 0.6, green: 0.2, blue: 0.0 },
+        }),
+      }
+    ),
+
+    // Note
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + 1,
+      1,
+      2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 14,
+          bold: true,
+          foregroundColor: { red: 0.6, green: 0.2, blue: 0.0 },
+        }),
+      }
+    ),
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + 1,
+      width + 1,
+      width + 2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 14,
+          bold: true,
+          foregroundColor: { red: 0.6, green: 0.2, blue: 0.0 },
+        }),
+      }
+    ),
+
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + 1,
+      2,
+      3,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+          foregroundColor: { red: 0.6, green: 0.2, blue: 0.0 },
+        }),
+      }
+    ),
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset,
+      height + noteOffset + 1,
+      width + 2,
+      width + 3,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+          foregroundColor: { red: 0.6, green: 0.2, blue: 0.0 },
+        }),
+      }
+    ),
+
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset + 1,
+      height + noteOffset + 2,
+      2,
+      3,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+          foregroundColor: { red: 1.0, green: 0.0, blue: 0.0 },
+        }),
+      }
+    ),
+
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset + 1,
+      height + noteOffset + 2,
+      width + 2,
+      width + 3,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+          foregroundColor: { red: 1.0, green: 0.0, blue: 0.0 },
+        }),
+      }
+    ),
+
+    // Make background yellow
+    {
+      repeatCell: {
+        range: {
+          sheetId,
+          startRowIndex: height + noteOffset + 2,
+          endRowIndex: height + noteOffset + noteHeight,
+          startColumnIndex: 2,
+          endColumnIndex: 3,
+        },
+        cell: {
+          userEnteredFormat: {
+            backgroundColor: { red: 1.0, green: 1.0, blue: 0.0 },
+          },
+        },
+        fields: "userEnteredFormat.backgroundColor",
+      },
+    },
+
+    {
+      repeatCell: {
+        range: {
+          sheetId,
+          startRowIndex: height + noteOffset + 2,
+          endRowIndex: height + noteOffset + noteHeight,
+          startColumnIndex: width + 2,
+          endColumnIndex: width + 3,
+        },
+        cell: {
+          userEnteredFormat: {
+            backgroundColor: { red: 1.0, green: 1.0, blue: 0.0 },
+          },
+        },
+        fields: "userEnteredFormat.backgroundColor",
+      },
+    },
+
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset + 1,
+      height + noteOffset + noteHeight,
+      3,
+      data.subjects.length + 2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+        }),
+      }
+    ),
+
+    repeatCellRequest(
+      sheetId,
+      height + noteOffset + 1,
+      height + noteOffset + noteHeight,
+      width + 3,
+      width + data.subjects.length + 2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+        }),
+      }
+    ),
+
+    // Ranges
+    // Make the total cell font size 12
+    repeatCellRequest(
+      sheetId,
+      height + rangesOffset,
+      height + rangesOffset + rangesHeight,
+      0,
+      width * 2,
+      {
+        textFormat: textFormatRequest({ fontSize: 12 }),
+      }
+    ),
+
+    // Make subject names red and bold
+    repeatCellRequest(
+      sheetId,
+      height + rangesOffset,
+      height + rangesOffset + 1,
+      2,
+      data.subjects.length + 2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+          foregroundColor: { red: 1.0, green: 0.0, blue: 0.0 },
+        }),
+      }
+    ),
+
+    repeatCellRequest(
+      sheetId,
+      height + rangesOffset,
+      height + rangesOffset + 1,
+      width + 2,
+      width + data.subjects.length + 2,
+      {
+        textFormat: textFormatRequest({
+          fontSize: 12,
+          bold: true,
+          foregroundColor: { red: 1.0, green: 0.0, blue: 0.0 },
+        }),
+      }
+    ),
+
+    // Make headers bold
+    repeatCellRequest(
+      sheetId,
+      height + rangesOffset,
+      height + rangesOffset + rangesHeight,
+      1,
+      2,
+      {
+        textFormat: textFormatRequest({ fontSize: 12, bold: true }),
+      }
+    ),
+
+    repeatCellRequest(
+      sheetId,
+      height + rangesOffset,
+      height + rangesOffset + rangesHeight,
+      width + 1,
+      width + 2,
+      {
+        textFormat: textFormatRequest({ fontSize: 12, bold: true }),
+      }
+    ),
+  ];
+
+  await updateSpreadSheet(spreadsheetId, requests);
+
+  const ut1Stats = [];
+  const ut2Stats = [];
+  const ut1TotalAverage = [];
+  const ut2TotalAverage = [];
+  const ut1Ranges = [];
+  const ut2Ranges = [];
+
+  // Headers
+  const statsHeader = [""];
+  const rangesHeader = ["Marks obtained by Students"];
+
+  for (const subject of data.subjects) {
+    statsHeader.push(subject.title);
+    rangesHeader.push(subject.title);
+  }
+
+  ut1Stats.push(statsHeader);
+  ut2Stats.push(statsHeader);
+  ut1Ranges.push(rangesHeader);
+  ut2Ranges.push(rangesHeader);
+
+  // Stats
+  // Absent
+  const ut1Absent = ["ABSENT"];
+  const ut2Absent = ["ABSENT"];
+  // Appeared
+  const ut1Appeared = ["APPEARED"];
+  const ut2Appeared = ["APPEARED"];
+  // Passed
+  const ut1Passed = ["PASS"];
+  const ut2Passed = ["PASS"];
+  // Failed
+  const ut1Failed = ["FAIL"];
+  const ut2Failed = ["FAIL"];
+  // Total
+  const ut1Total = ["TOTAL"];
+  const ut2Total = ["TOTAL"];
+  // Average
+  const ut1Average = ["AVG"];
+  const ut2Average = ["AVG"];
+
+  // Ranges
+  // Absent
+  const ut1_A = ["A"];
+  const ut2_A = ["A"];
+  // 0
+  const ut1_0 = ["0"];
+  const ut2_0 = ["0"];
+  // 0-11
+  const ut1_0_11 = ["0-11"];
+  const ut2_0_11 = ["0-11"];
+  // 12-17
+  const ut1_12_17 = ["12-17"];
+  const ut2_12_17 = ["12-17"];
+  // 18-22
+  const ut1_18_22 = ["18-22"];
+  const ut2_18_22 = ["18-22"];
+  // 23-30
+  const ut1_23_30 = ["23-30"];
+  const ut2_23_30 = ["23-30"];
+  // Total
+  const ut1_Total = [""];
+  const ut2_Total = [""];
+
+  for (const subject of data.subjects) {
+    ut1Absent.push(data.stats.ut1.absent[subject.title]);
+    ut2Absent.push(data.stats.ut2.absent[subject.title]);
+    ut1Appeared.push(data.stats.ut1.appeared[subject.title]);
+    ut2Appeared.push(data.stats.ut2.appeared[subject.title]);
+    ut1Passed.push(data.stats.ut1.passed[subject.title]);
+    ut2Passed.push(data.stats.ut2.passed[subject.title]);
+    ut1Failed.push(data.stats.ut1.failed[subject.title]);
+    ut2Failed.push(data.stats.ut2.failed[subject.title]);
+    ut1Total.push(data.stats.ut1.total[subject.title]);
+    ut2Total.push(data.stats.ut2.total[subject.title]);
+    ut1Average.push(data.stats.ut1.average[subject.title]);
+    ut2Average.push(data.stats.ut2.average[subject.title]);
+
+    ut1_A.push(data.stats.ut1.absent[subject.title]);
+    ut2_A.push(data.stats.ut2.absent[subject.title]);
+    ut1_0.push(data.stats.ut1Ranges._0[subject.title]);
+    ut2_0.push(data.stats.ut2Ranges._0[subject.title]);
+    ut1_0_11.push(data.stats.ut1Ranges._0_11[subject.title]);
+    ut2_0_11.push(data.stats.ut2Ranges._0_11[subject.title]);
+    ut1_12_17.push(data.stats.ut1Ranges._12_17[subject.title]);
+    ut2_12_17.push(data.stats.ut2Ranges._12_17[subject.title]);
+    ut1_18_22.push(data.stats.ut1Ranges._18_22[subject.title]);
+    ut2_18_22.push(data.stats.ut2Ranges._18_22[subject.title]);
+    ut1_23_30.push(data.stats.ut1Ranges._23_30[subject.title]);
+    ut2_23_30.push(data.stats.ut2Ranges._23_30[subject.title]);
+    ut1_Total.push(data.stats.ut1.total[subject.title]);
+    ut2_Total.push(data.stats.ut2.total[subject.title]);
+  }
+
+  ut1Stats.push(
+    ...[ut1Absent, ut1Appeared, ut1Passed, ut1Failed, ut1Total, ut1Average]
+  );
+  ut2Stats.push(
+    ...[ut2Absent, ut2Appeared, ut2Passed, ut2Failed, ut2Total, ut2Average]
+  );
+
+  ut1TotalAverage.push(["TOTAL AVG", data.stats.totalUt1Average]);
+  ut2TotalAverage.push(["TOTAL AVG", data.stats.totalUt2Average]);
+
+  ut1Ranges.push(
+    ...[ut1_A, ut1_0, ut1_0_11, ut1_12_17, ut1_18_22, ut1_23_30, ut1_Total]
+  );
+
+  ut2Ranges.push(
+    ...[ut2_A, ut2_0, ut2_0_11, ut2_12_17, ut2_18_22, ut2_23_30, ut2_Total]
+  );
+
+  const ut1StatsRange = convertRowColToA1Notation(
+    sheetName,
+    height + statsOffset,
+    1
+  );
+  const ut2StatsRange = convertRowColToA1Notation(
+    sheetName,
+    height + statsOffset,
+    width + 1
+  );
+  const ut1TotalAverageRange = convertRowColToA1Notation(
+    sheetName,
+    height + totalAverageOffset,
+    1
+  );
+  const ut2TotalAverageRange = convertRowColToA1Notation(
+    sheetName,
+    height + totalAverageOffset,
+    width + 1
+  );
+  const ut1RangesRange = convertRowColToA1Notation(
+    sheetName,
+    height + rangesOffset,
+    1
+  );
+  const ut2RangesRange = convertRowColToA1Notation(
+    sheetName,
+    height + rangesOffset,
+    width + 1
+  );
+
+  // Note
+  const values = [
+    // Note
+    {
+      range: convertRowColToA1Notation(sheetName, height + noteOffset, 1),
+      values: [["Note"]],
+    },
+    {
+      range: convertRowColToA1Notation(
+        sheetName,
+        height + noteOffset,
+        width + 1
+      ),
+      values: [["Note"]],
+    },
+    // Consider 12 marks for passing
+    {
+      range: convertRowColToA1Notation(sheetName, height + noteOffset, 2),
+      values: [[`Considered ${data.minUTMarksRequired} marks for passing`]],
+    },
+    {
+      range: convertRowColToA1Notation(
+        sheetName,
+        height + noteOffset,
+        width + 2
+      ),
+      values: [[`Considered ${data.minUTMarksRequired} marks for passing`]],
+    },
+    // Absent Fail
+    {
+      range: convertRowColToA1Notation(sheetName, height + noteOffset + 1, 2),
+      values: [
+        ["A", "ABSENT"],
+        ["", "FAIL"],
+      ],
+    },
+    {
+      range: convertRowColToA1Notation(
+        sheetName,
+        height + noteOffset + 1,
+        width + 2
+      ),
+      values: [
+        ["A", "ABSENT"],
+        ["", "FAIL"],
+      ],
+    },
+  ];
+
+  await Promise.all([
+    // Stats
+    updateSpreadSheetValues(spreadsheetId, ut1StatsRange, ut1Stats),
+    updateSpreadSheetValues(spreadsheetId, ut2StatsRange, ut2Stats),
+
+    // Total average
+    updateSpreadSheetValues(
+      spreadsheetId,
+      ut1TotalAverageRange,
+      ut1TotalAverage
+    ),
+    updateSpreadSheetValues(
+      spreadsheetId,
+      ut2TotalAverageRange,
+      ut2TotalAverage
+    ),
+
+    // Note
+    updateSpreadSheetValuesBatch(spreadsheetId, values),
+
+    // Ranges
+    updateSpreadSheetValues(spreadsheetId, ut1RangesRange, ut1Ranges),
+    updateSpreadSheetValues(spreadsheetId, ut2RangesRange, ut2Ranges),
+  ]);
+};
+
+const drawCharts = async (spreadsheetId, sheetId, sheetName, data) => {
+  // Draw charts
+  // On x-axis, we have subjects
+  // On y-axis, we have range of marks (A, 0, 0-11, 12-17, 18-22, 23-30)
+
+  const width = data.rollNosNamesAndUt1Marks.length - 1;
+  const height = data.rollNosNamesAndUt1Marks[0].length + 7;
+
+  const charts = [];
+
+  charts.push({
+    title: "Unit Test I",
+    domainSourceData: {
+      startRowIndex: height + 19,
+      endRowIndex: height + 20,
+      startColumnIndex: 1,
+      endColumnIndex: data.subjects.length + 2,
+    },
+    series: Array(6)
+      .fill(0)
+      .map((_, index) => {
+        return {
+          startRowIndex: height + index + 20,
+          endRowIndex: height + index + 21,
+          startColumnIndex: 1,
+          endColumnIndex: data.subjects.length + 2,
+        };
+      }),
+    position: {
+      rowIndex: height + 30,
+      columnIndex: 1,
+    },
+  });
+
+  charts.push({
+    title: "Unit Test II",
+    domainSourceData: {
+      startRowIndex: height + 19,
+      endRowIndex: height + 20,
+      startColumnIndex: width + 1,
+      endColumnIndex: width + data.subjects.length + 2,
+    },
+    series: Array(6)
+      .fill(0)
+      .map((_, index) => {
+        return {
+          startRowIndex: height + index + 20,
+          endRowIndex: height + index + 21,
+          startColumnIndex: width + 1,
+          endColumnIndex: width + data.subjects.length + 2,
+        };
+      }),
+    position: {
+      rowIndex: height + 30,
+      columnIndex: width + 1,
+    },
+  });
+
+  const requests = [];
+
+  for (const chart of charts) {
+    requests.push({
+      addChart: {
+        chart: {
+          spec: {
+            title: chart.title,
+            basicChart: {
+              chartType: "COLUMN",
+              legendPosition: "RIGHT_LEGEND",
+              domains: [
+                {
+                  domain: {
+                    sourceRange: {
+                      sources: [
+                        {
+                          sheetId,
+                          startRowIndex: chart.domainSourceData.startRowIndex,
+                          endRowIndex: chart.domainSourceData.endRowIndex,
+                          startColumnIndex:
+                            chart.domainSourceData.startColumnIndex,
+                          endColumnIndex: chart.domainSourceData.endColumnIndex,
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+              series: chart.series.map((series) => {
+                return {
+                  series: {
+                    sourceRange: {
+                      sources: [
+                        {
+                          sheetId,
+                          startRowIndex: series.startRowIndex,
+                          endRowIndex: series.endRowIndex,
+                          startColumnIndex: series.startColumnIndex,
+                          endColumnIndex: series.endColumnIndex,
+                        },
+                      ],
+                    },
+                  },
+                  targetAxis: "LEFT_AXIS",
+                };
+              }),
+              headerCount: 1,
+            },
+          },
+          position: {
+            overlayPosition: {
+              anchorCell: {
+                sheetId,
+                rowIndex: chart.position.rowIndex,
+                columnIndex: chart.position.columnIndex,
+              },
+              widthPixels: 900,
+              heightPixels: 600,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  await updateSpreadSheet(spreadsheetId, requests);
+};
+
+const finalizeSheet = async (spreadsheetId, sheetId, data) => {
+  await Promise.all([
+    // Make font times new roman
+    makeTimesNewRomanAsDefaultFont(spreadsheetId, sheetId),
+
+    // Adjust spacing of main sheet
+    adjustCellsSpacing(
+      spreadsheetId,
+      sheetId,
+      0,
+      data.rollNos.length + 7,
+      0,
+      data.rollNosNamesAndUt1Marks.length + 2
+    ),
+
+    // Adjust spacing of stats sheet
+    adjustCellsSpacing(
+      spreadsheetId,
+      sheetId,
+      data.rollNos.length + 9,
+      data.rollNos.length + 30,
+      0,
+      data.rollNosNamesAndUt1Marks.length + 2,
+      7
+    ),
+  ]);
+};
+
 const generateMasterUtSheet = async (year, spreadsheetId) => {
   const classes = await Classes.find({ year }).sort("class");
 
   for (const class_ of classes) {
-    // TODO: Remove this condition
-    if (class_.class !== "TE09") {
+    let data = await gatherData(year, class_.class);
+
+    if (!data || !data.rollNos || !data.rollNos.length) {
       continue;
     }
 
-    const data = await gatherData(year, class_.class);
-    const { rollNosNamesAndUt1Marks, rollNosNamesAndUt2Marks } =
-      processData(data);
+    data = processData(data);
 
     const sheet = await getSpreadSheet(spreadsheetId);
 
@@ -828,10 +1781,18 @@ const generateMasterUtSheet = async (year, spreadsheetId) => {
       (sheet) => sheet.properties.title === sheetTitle
     );
     if (!sheetExists) {
-      addSheet(
+      await addSheet(
         spreadsheetId,
         `${data.class_} SEM-${data.semester} ${data.academicYear}`
       );
+
+      // Delete the default sheet
+      const defaultSheet = sheet.data.sheets.find(
+        (sheet) => sheet.properties.title === "Sheet1"
+      );
+      if (defaultSheet) {
+        deleteSheet(spreadsheetId, defaultSheet.properties.sheetId);
+      }
     }
 
     const newSheet = await getSpreadSheet(spreadsheetId);
@@ -841,41 +1802,15 @@ const generateMasterUtSheet = async (year, spreadsheetId) => {
 
     const titleSheetId = newSheetForTitle.properties.sheetId;
 
-    await createHeader(
-      spreadsheetId,
-      titleSheetId,
-      sheetTitle,
-      data,
-      rollNosNamesAndUt1Marks.length - 1
-    );
+    await Promise.all([
+      createHeader(spreadsheetId, titleSheetId, sheetTitle, data),
+      createSubjectHeader(spreadsheetId, titleSheetId, sheetTitle, data),
+      createSubjectMarks(spreadsheetId, titleSheetId, sheetTitle, data),
+      createSubjectStats(spreadsheetId, titleSheetId, sheetTitle, data),
+      drawCharts(spreadsheetId, titleSheetId, sheetTitle, data),
+    ]);
 
-    await createSubjectHeader(
-      spreadsheetId,
-      titleSheetId,
-      sheetTitle,
-      data,
-      rollNosNamesAndUt1Marks.length - 1
-    );
-
-    await createSubjectMarks(
-      spreadsheetId,
-      titleSheetId,
-      sheetTitle,
-      rollNosNamesAndUt1Marks,
-      rollNosNamesAndUt2Marks,
-      data.minUTMarksRequired
-    );
-
-    await makeTimesNewRomanAsDefaultFont(spreadsheetId, titleSheetId);
-    // await adjustCellsSpacing(spreadsheetId);
-  }
-
-  const sheet = await getSpreadSheet(spreadsheetId);
-  const sheet1 = sheet.data.sheets.find(
-    (sheet) => sheet.properties.title === "Sheet1"
-  );
-  if (sheet1) {
-    deleteSheet(spreadsheetId, sheet1.properties.sheetId);
+    await finalizeSheet(spreadsheetId, titleSheetId, data);
   }
 };
 

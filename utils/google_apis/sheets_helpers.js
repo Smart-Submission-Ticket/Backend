@@ -56,69 +56,55 @@ const makeTimesNewRomanAsDefaultFont = async (spreadsheetId, sheetId) => {
   await updateSpreadSheet(spreadsheetId, requests);
 };
 
-async function adjustCellsSpacing(spreadsheetId) {
-  // Get all sheets in the spreadsheet
-  const res = await getSpreadSheet(spreadsheetId);
-  const sheets = res.data.sheets;
+async function adjustCellsSpacing(
+  spreadsheetId,
+  sheetId,
+  startRowIndex = null,
+  endRowIndex = null,
+  startColumnIndex = null,
+  endColumnIndex = null,
+  verticalPadding = 5,
+  horizontalPadding = 8
+) {
+  const requests = [];
 
-  sheets.forEach((sheet) => {
-    const sheetId = sheet.properties.sheetId;
-    const gridProperties = sheet.properties.gridProperties;
-
-    const requests = [];
-
-    // Resize columns
-    requests.push({
-      autoResizeDimensions: {
-        dimensions: {
-          sheetId,
-          dimension: "COLUMNS",
-          startIndex: 0,
-          endIndex: gridProperties.columnCount,
-        },
+  // Resize rows
+  requests.push({
+    autoResizeDimensions: {
+      dimensions: {
+        sheetId,
+        dimension: "ROWS",
+        startIndex: startRowIndex || 0,
+        endIndex: endRowIndex || 1000,
       },
-    });
+    },
+  });
 
-    // Resize rows
-    requests.push({
-      autoResizeDimensions: {
-        dimensions: {
-          sheetId,
-          dimension: "ROWS",
-          startIndex: 0,
-          endIndex: gridProperties.rowCount,
-        },
+  requests.push({
+    repeatCell: {
+      range: {
+        sheetId,
+        startRowIndex: startRowIndex || 0,
+        endRowIndex: endRowIndex || 1000,
+        startColumnIndex: startColumnIndex || 0,
+        endColumnIndex: endColumnIndex || 1000,
       },
-    });
-
-    requests.push({
-      repeatCell: {
-        range: {
-          sheetId,
-          startRowIndex: 0,
-          endRowIndex: gridProperties.rowCount,
-          startColumnIndex: 0,
-          endColumnIndex: gridProperties.columnCount,
-        },
-        cell: {
-          // Apply padding to cells
-          userEnteredFormat: {
-            padding: {
-              top: 4,
-              bottom: 2,
-              left: 12,
-              right: 12,
-            },
-            // Make text centered
-            horizontalAlignment: "CENTER",
+      cell: {
+        // Apply padding to cells
+        userEnteredFormat: {
+          padding: {
+            top: verticalPadding,
+            bottom: verticalPadding,
+            left: horizontalPadding,
+            right: horizontalPadding,
           },
         },
-        fields: "userEnteredFormat(padding,horizontalAlignment)",
       },
-    });
-
-    updateSpreadSheet(spreadsheetId, requests);
+      fields: "userEnteredFormat(padding)",
+    },
   });
+
+  await updateSpreadSheet(spreadsheetId, requests);
 }
 
 const mergeCellsRequest = (
@@ -168,11 +154,9 @@ const repeatCellRequest = (
           ...(borders !== null ? { borders } : {}),
         },
       },
-      fields:
-        // "userEnteredFormat(horizontalAlignment,verticalAlignment,wrapStrategy,textFormat,borders)",
-        `userEnteredFormat(horizontalAlignment,verticalAlignment,wrapStrategy,${
-          textFormat !== null ? "textFormat," : ""
-        }${borders !== null ? "borders" : ""})`,
+      fields: `userEnteredFormat(horizontalAlignment,verticalAlignment,wrapStrategy,${
+        textFormat !== null ? "textFormat," : ""
+      }${borders !== null ? "borders" : ""})`,
     },
   };
 };
@@ -209,13 +193,14 @@ const updateDimensionsRequest = (
   sheetId,
   startColumnIndex,
   endColumnIndex,
-  pixelSize
+  pixelSize,
+  dimension = "COLUMNS"
 ) => {
   return {
     updateDimensionProperties: {
       range: {
         sheetId,
-        dimension: "COLUMNS",
+        dimension,
         startIndex: startColumnIndex,
         endIndex: endColumnIndex,
       },
@@ -223,6 +208,36 @@ const updateDimensionsRequest = (
         pixelSize,
       },
       fields: "pixelSize",
+    },
+  };
+};
+
+const updateBordersRequest = (
+  sheetId,
+  startRowIndex,
+  endRowIndex,
+  startColumnIndex,
+  endColumnIndex,
+  topWidth = null,
+  bottomWidth = null,
+  leftWidth = null,
+  rightWidth = null
+) => {
+  return {
+    updateBorders: {
+      range: {
+        sheetId,
+        startRowIndex,
+        endRowIndex,
+        startColumnIndex,
+        endColumnIndex,
+      },
+      top: topWidth ? { style: "SOLID", width: topWidth } : null,
+      bottom: bottomWidth ? { style: "SOLID", width: bottomWidth } : null,
+      left: leftWidth ? { style: "SOLID", width: leftWidth } : null,
+      right: rightWidth ? { style: "SOLID", width: rightWidth } : null,
+      innerHorizontal: { style: "SOLID", width: 1 },
+      innerVertical: { style: "SOLID", width: 1 },
     },
   };
 };
@@ -238,4 +253,5 @@ module.exports = {
   textFormatRequest,
   bordersRequest,
   updateDimensionsRequest,
+  updateBordersRequest,
 };
