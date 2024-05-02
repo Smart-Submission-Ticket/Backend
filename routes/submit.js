@@ -32,7 +32,7 @@ const {
   uploadTESeminarsDataToSpreadSheet,
   uploadBEProjectsDataToSpreadSheet,
   uploadHonorsDataToSpreadSheet,
-} = require("../utils/google_sheets_service");
+} = require("../utils/sheets/upload_data");
 
 const router = express.Router();
 
@@ -124,7 +124,7 @@ router.post(
     assert(subject, "ERROR 400: Subject is required.");
 
     const assignments = readExcel(req.file.buffer);
-    await uploadAssignmentsData(subject, assignments, req.user);
+    await uploadAssignmentsData(subject, assignments, req.user, req.role);
     logs(req, `Assignments updated for ${subject}.`);
     res.send({ message: "Assignments updated." });
   }
@@ -135,7 +135,7 @@ router.post("/utmarks", teacher, upload.single("file"), async (req, res) => {
   assert(subject, "ERROR 400: Subject is required.");
 
   const utmarks = readExcel(req.file.buffer);
-  await uploadUTMarksData(subject, utmarks, req.user);
+  await uploadUTMarksData(subject, utmarks, req.user, req.role);
   logs(req, `UT marks updated for ${subject}.`);
   res.send({ message: "UT marks updated." });
 });

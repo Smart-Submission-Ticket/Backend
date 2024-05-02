@@ -459,6 +459,7 @@
     ```json
     {
       "academicYear": "2023 - 2024",
+      "semester": "I",
       "attendanceLabAsst": "Mrs S. L. Rane",
       "studentAcheivementCommittee": "Sheetal Patil Madam",
       "attendance": {
@@ -642,6 +643,7 @@
     ```json
     {
       "academicYear": "2023 - 2024",
+      "semester": "I",
       "attendanceLabAsst": "Mrs S. L. Rane",
       "studentAcheivementCommittee": "Sheetal Patil Madam",
       "minUTMarksRequired": 12,

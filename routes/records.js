@@ -69,12 +69,14 @@ router.get("/", auth, async (req, res) => {
       theory: batch.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batch.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
@@ -131,12 +133,14 @@ router.get("/rollNo/:rollNo", teacher, async (req, res) => {
       theory: batch.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batch.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
@@ -190,23 +194,20 @@ router.get("/batch/:batch", teacher, async (req, res) => {
       theory: batchDoc.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batchDoc.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
       }),
     },
   };
-
-  const noOfAssignments = {};
-  batchDoc.practical.forEach((practical) => {
-    noOfAssignments[practical.title] = practical.noOfAssignments;
-  });
 
   students.forEach((student) => {
     const record = records.find((record) => record.rollNo === student.rollNo);
@@ -285,23 +286,20 @@ router.get("/class/:class", teacher, async (req, res) => {
         theory: batchDoc.theory.map((theory) => {
           return {
             title: theory.title,
+            elective: theory.elective,
             teacher: theory.teacher,
           };
         }),
         practical: batchDoc.practical.map((practical) => {
           return {
             title: practical.title,
+            elective: practical.elective,
             noOfAssignments: practical.noOfAssignments,
             teacher: practical.teacher,
           };
         }),
       },
     };
-  });
-
-  const noOfAssignments = {};
-  batchDocs[0].practical.forEach((practical) => {
-    noOfAssignments[practical.title] = practical.noOfAssignments;
   });
 
   students.forEach((student) => {
@@ -380,23 +378,20 @@ router.get("/batch/:batch/subject/:subject", teacher, async (req, res) => {
       theory: batchDoc.theory.map((theory) => {
         return {
           title: theory.title,
+          elective: theory.elective,
           teacher: theory.teacher,
         };
       }),
       practical: batchDoc.practical.map((practical) => {
         return {
           title: practical.title,
+          elective: practical.elective,
           noOfAssignments: practical.noOfAssignments,
           teacher: practical.teacher,
         };
       }),
     },
   };
-
-  const noOfAssignments = {};
-  batchDoc.practical.forEach((practical) => {
-    noOfAssignments[practical.title] = practical.noOfAssignments;
-  });
 
   students.forEach((student) => {
     const record = records.find((record) => record.rollNo === student.rollNo);
@@ -465,13 +460,13 @@ router.get("/class/:class/subject/:subject", teacher, async (req, res) => {
   assert(records, "ERROR 404: Records not found");
 
   // See if subject is present in the assignments
-  const subjectExistsInAssignments = batchDocs[0].practical.some(
-    (practical) => practical.title === subject
+  const subjectExistsInAssignments = batchDocs.some((batchDoc) =>
+    batchDoc.practical.some((practical) => practical.title === subject)
   );
 
   // See if subject is present in the theory
-  const subjectExistsInTheory = batchDocs[0].theory.some(
-    (theory) => theory.title === subject
+  const subjectExistsInTheory = batchDocs.some((batchDoc) =>
+    batchDoc.theory.some((theory) => theory.title === subject)
   );
 
   assert(
@@ -491,23 +486,20 @@ router.get("/class/:class/subject/:subject", teacher, async (req, res) => {
         theory: batchDoc.theory.map((theory) => {
           return {
             title: theory.title,
+            elective: theory.elective,
             teacher: theory.teacher,
           };
         }),
         practical: batchDoc.practical.map((practical) => {
           return {
             title: practical.title,
+            elective: practical.elective,
             noOfAssignments: practical.noOfAssignments,
             teacher: practical.teacher,
           };
         }),
       },
     };
-  });
-
-  const noOfAssignments = {};
-  batchDocs[0].practical.forEach((practical) => {
-    noOfAssignments[practical.title] = practical.noOfAssignments;
   });
 
   students.forEach((student) => {
