@@ -320,6 +320,94 @@ const processData = (data) => {
   return data;
 };
 
+const initializeSheet = async (spreadsheetId, sheetId) => {
+  // Remove all sheet data and styles
+  const spreadsheet = await getSpreadSheet(spreadsheetId);
+
+  const sheet = spreadsheet.data.sheets.find(
+    (sheet) => sheet.properties.sheetId === sheetId
+  );
+
+  const requests = [
+    {
+      repeatCell: {
+        range: {
+          sheetId,
+          startRowIndex: 0,
+          endRowIndex: sheet.properties.gridProperties.rowCount,
+          startColumnIndex: 0,
+          endColumnIndex: sheet.properties.gridProperties.columnCount,
+        },
+        cell: {
+          userEnteredValue: {
+            stringValue: "",
+          },
+        },
+        fields: "userEnteredValue",
+      },
+    },
+  ];
+
+  if (sheet.merges) {
+    sheet.merges.forEach((merge) => {
+      requests.push({
+        unmergeCells: {
+          range: {
+            sheetId,
+            startRowIndex: merge.startRowIndex,
+            endRowIndex: merge.endRowIndex,
+            startColumnIndex: merge.startColumnIndex,
+            endColumnIndex: merge.endColumnIndex,
+          },
+        },
+      });
+    });
+  }
+
+  if (sheet.conditionalFormats) {
+    sheet.conditionalFormats.forEach((conditionalFormat) => {
+      requests.push({
+        deleteConditionalFormatRule: {
+          sheetId,
+          index: conditionalFormat.index,
+        },
+      });
+    });
+  }
+
+  if (sheet.charts) {
+    sheet.charts.forEach((chart) => {
+      requests.push({
+        deleteEmbeddedObject: {
+          objectId: chart.chartId,
+        },
+      });
+    });
+  }
+
+  requests.push({
+    repeatCell: {
+      range: {
+        sheetId,
+        startRowIndex: 0,
+        endRowIndex: sheet.properties.gridProperties.rowCount,
+        startColumnIndex: 0,
+        endColumnIndex: sheet.properties.gridProperties.columnCount,
+      },
+      cell: {
+        userEnteredFormat: {
+          textFormat: null,
+          borders: bordersRequest(0, 0, 0, 0),
+          backgroundColor: { red: 1.0, green: 1.0, blue: 1.0 },
+        },
+      },
+      fields: "userEnteredFormat(textFormat,borders,backgroundColor)",
+    },
+  });
+
+  await updateSpreadSheet(spreadsheetId, requests);
+};
+
 const createHeader = async (spreadsheetId, sheetId, sheetName, data) => {
   const width = data.rollNosNamesAndUt1Marks.length - 1;
 
@@ -1796,11 +1884,11 @@ const generateMasterUtSheet = async (year, spreadsheetId) => {
     }
 
     const newSheet = await getSpreadSheet(spreadsheetId);
-    const newSheetForTitle = newSheet.data.sheets.find(
+    const titleSheetId = newSheet.data.sheets.find(
       (sheet) => sheet.properties.title === sheetTitle
-    );
+    ).properties.sheetId;
 
-    const titleSheetId = newSheetForTitle.properties.sheetId;
+    await initializeSheet(spreadsheetId, titleSheetId);
 
     await Promise.all([
       createHeader(spreadsheetId, titleSheetId, sheetTitle, data),
