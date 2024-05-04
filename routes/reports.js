@@ -12,7 +12,7 @@ const { generateMasterUtSheet } = require("../utils/sheets/master_ut");
 
 const router = express.Router();
 
-router.post("/master/ut", async (req, res) => {
+router.post("/ut", async (req, res) => {
   /*
   Valid years:
   1. years: 3
@@ -94,7 +94,7 @@ router.post("/master/ut", async (req, res) => {
   }).select("-_id -__v -parentFolderId");
 
   res.send({
-    message: "Master UT sheets created.",
+    message: "UT reports generated successfully",
     sheets: createSheets.map((sheet) => {
       return {
         title: sheet.title,

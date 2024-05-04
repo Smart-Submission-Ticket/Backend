@@ -1,5 +1,19 @@
 # Smart Submission Ticket - Backend
 
+## Table of Contents
+
+- [API Endpoints](#api-endpoints)
+  - [Student Registration](#student-registration)
+  - [Teacher Registration](#teacher-registration)
+  - [Admin Registration](#admin-registration)
+  - [Login](#login)
+  - [Forgot Password](#forgot-password)
+  - [Excel data](#excel-data)
+  - [Classes and Batches](#classes-and-batches)
+  - [Records](#records)
+  - [Update Records](#update-records)
+  - [Generate Reports](#generate-reports)
+
 ## API Endpoints
 
 ### Student Registration
@@ -771,3 +785,45 @@
      ]
    }
    ```
+
+### Generate Reports
+
+1. `POST /reports/ut`
+
+   - Will generate UT reports.
+
+   - Request headers:
+
+     - `x-auth-token`: "jwt-token for admin authentication"
+
+   - Request Body:
+
+     ```json
+     {
+       "years": [2, 3, 4]
+     }
+     ```
+
+     - If years is not provided, will generate for all years.
+
+   - Response:
+
+     ```json
+     {
+       "message": "UT reports generated successfully",
+       "sheets": [
+         {
+           "title": "2023 - 2024 SEM I Unit Test 1 & 2 Reports SE",
+           "link": "https://docs.google.com/spreadsheets/d/1"
+         },
+         {
+           "title": "2023 - 2024 SEM I Unit Test 1 & 2 Reports TE",
+           "link": "https://docs.google.com/spreadsheets/d/2"
+         },
+         {
+           "title": "2023 - 2024 SEM I Unit Test 1 & 2 Reports BE",
+           "link": "https://docs.google.com/spreadsheets/d/3"
+         }
+       ]
+     }
+     ```
