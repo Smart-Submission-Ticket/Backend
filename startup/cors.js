@@ -8,5 +8,6 @@ module.exports = function (app) {
     })
   );
 
+  app.set("trust proxy", true);
   app.use(useragent.express());
 };
